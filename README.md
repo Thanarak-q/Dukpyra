@@ -1,7 +1,7 @@
 # 🔮 Dukpyra Framework
 
 <p align="center">
-  <img src="mascot.png" alt="Dukpyra Mascot" width="400">
+  <img src="mascot.png" alt="Dukpyra Mascot" width="800">
 </p>
 
 > **The Pythonic Web Framework powered by .NET**  
