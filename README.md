@@ -1,9 +1,13 @@
-# 🔮 Dukpyra
+# 🔮 Dukpyra Framework
 
-> **Python → C# JIT Compiler for Web APIs**  
-> เขียน API ด้วย Python syntax รันด้วย .NET performance
+<p align="center">
+  <img src="mascot.png" alt="Dukpyra Mascot" width="200">
+</p>
 
-[![Version](https://img.shields.io/badge/version-0.00001-purple.svg)](https://github.com/dukpyra)
+> **The Pythonic Web Framework powered by .NET**  
+> เขียนแบบ Python รันด้วยพลัง .NET
+
+[![Version](https://img.shields.io/badge/version-0.00001-purple.svg)](https://github.com/Thanarak-q/Dukpyra)
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![.NET](https://img.shields.io/badge/.NET-10-purple.svg)](https://dotnet.microsoft.com/)
 
@@ -11,7 +15,7 @@
 
 ## 🤔 What is Dukpyra?
 
-**Dukpyra** คือ transpiler ที่แปลง Python code ไปเป็น C# ASP.NET Core แบบ real-time 
+**Dukpyra** คือ Web Framework ที่ให้คุณเขียน API ด้วย Python syntax แต่รันบน .NET runtime ทำให้ได้ performance ระดับ production 
 
 เขียน API แบบนี้ใน Python:
 
@@ -35,9 +39,10 @@ def health():
 |---------|-------------|
 | 🐍 **Python Syntax** | เขียน API ด้วย syntax ที่คุ้นเคย ไม่ต้องเรียน C# |
 | 🚀 **.NET Performance** | รันบน ASP.NET Core ได้ performance ระดับ production |
-| 🔥 **Hot Reload** | แก้ `input.py` แล้ว server reload อัตโนมัติ |
+| 🔥 **Hot Reload** | แก้ code แล้ว server reload อัตโนมัติ |
 | 📦 **Zero Config** | `dukpyra init` แล้วเริ่มเขียนได้เลย |
-| 🔄 **Type Mapping** | รองรับ Python type hints → C# types |
+| 🔄 **Type Safety** | รองรับ Python type hints → C# types |
+| 🎯 **Framework-first** | ออกแบบมาเพื่อเป็น framework ไม่ใช่แค่ transpiler |
 
 ---
 
@@ -105,11 +110,13 @@ dukpyra dev --no-build
 
 ## 🔧 How It Works
 
+Dukpyra ทำงานเป็น **compile-time framework** ที่แปลง Python ไป C#:
+
 ```
 ┌─────────────┐     ┌──────────────┐     ┌─────────────────┐
-│  input.py   │ ──▶ │   compiler   │ ──▶ │   Program.cs    │
-│  (Python)   │     │   (AST)      │     │   (C#)          │
-└─────────────┘     └──────────────┘     └────────┬────────┘
+│  input.py   │ ──▶ │   Dukpyra     │ ──▶ │   Program.cs    │
+│  (Python)   │     │   Compiler    │     │   (C#)          │
+└─────────────┘     └──────────────┘     └────────┴────────┘
                                                   │
                                                   ▼
                                          ┌─────────────────┐
@@ -118,10 +125,10 @@ dukpyra dev --no-build
                                          └─────────────────┘
 ```
 
-1. **Parse** - อ่าน `input.py` และสร้าง AST (Abstract Syntax Tree)
-2. **Transform** - แปลง Python constructs ไปเป็น C# equivalents
-3. **Generate** - Render C# code ด้วย Jinja2 template
-4. **Run** - รันบน .NET runtime ด้วย `dotnet run`
+1. **Parse** - อ่าน Python code และสร้าง AST
+2. **Transform** - แปลง Python → C#
+3. **Generate** - สร้าง ASP.NET Core app
+4. **Run** - รันบน .NET runtime
 
 ---
 
@@ -217,18 +224,18 @@ MIT License
 
 ## 🌟 Vision
 
-> **v0.00001** → เริ่มต้นจาก transpiler เล็กๆ  
-> **v1.0.0** → กลายเป็น **Full-stack Framework** ที่ครบวงจร
+> 🌱 **v0.00001** — Foundation release  
+> 🚀 **v1.0.0** — Full-stack Web Framework
 
-เป้าหมายสุดท้ายของ Dukpyra คือการเป็น **framework เต็มรูปแบบ** ที่:
+**Dukpyra** ถูกออกแบบมาเป็น **framework เต็มรูปแบบ** ตั้งแต่แรก:
 
-- 🎨 เขียน Backend ด้วย Python syntax
-- ⚡ รันด้วย .NET 10 performance
-- 🔌 มี ecosystem ของ plugins และ extensions
-- 🛠️ รองรับ database, auth, caching, และอื่นๆ built-in
-- 📦 Deploy ได้ทุกที่ด้วย Docker/K8s
+- 🎨 เขียน Backend ด้วย Python syntax ที่คุ้นเคย
+- ⚡ รันด้วย .NET 10 performance ระดับ production
+- 🔌 Ecosystem ของ plugins และ extensions
+- 🛠️ Built-in: Database, Auth, Caching, Validation
+- 📦 Deploy-ready: Docker, Kubernetes, Cloud
 
-**Stay tuned!** 🚀
+**This is just the beginning.** �
 
 ---
 
