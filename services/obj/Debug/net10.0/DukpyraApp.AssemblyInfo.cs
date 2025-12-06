@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DukpyraApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7ba6ff8661d0338f081d1bffda6d33224b14142f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8643175e810144de696fe1b563253649f6b1c933")]
 [assembly: System.Reflection.AssemblyProductAttribute("DukpyraApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DukpyraApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

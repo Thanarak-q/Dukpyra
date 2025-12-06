@@ -149,338 +149,200 @@ def ensure_dotnet_project():
 
 @app.command()
 def init():
-    """Initialize a new Dukpyra project structure"""
+    """Initialize a new Dukpyra project"""
     print_banner()
-    log_info("Initializing Dukpyra project...")
-    
     ensure_services_dir()
-    if not ensure_dotnet_project():
-        raise typer.Exit(code=1)
-    
-    input_file = Path("input.py")
-    if not input_file.exists():
-        input_file.write_text('''# input.py - Your API definitions go here
-from typing import List, Optional
-
-
-@app.get("/")
-def index():
-    return {"message": "Hello from Dukpyra! 🔮"}
-
-
-@app.get("/health")
-def health():
-    return {"status": "ok"}
-''')
-        log_success("Created input.py template")
-    
-    print()
-    log_success(f"{Style.BOLD}Project initialized!{Style.RESET}")
-    print(f"\n  {Style.GRAY}Next steps:{Style.RESET}")
-    print(f"  {Style.CYAN}1.{Style.RESET} Edit {Style.BOLD}input.py{Style.RESET} to define your API")
-    print(f"  {Style.CYAN}2.{Style.RESET} Run {Style.BOLD}dukpyra dev{Style.RESET} to start development server")
-    print()
+    ensure_dotnet_project()
+    log_success("Project initialized successfully! 🚀")
+    print(f"\nExample usage:\n  {Style.CYAN}dukpyra dev{Style.RESET}\n")
 
 
 @app.command()
 def build():
-    """Build the project: compile Python → C#"""
-    log_info("Building project...")
-    
+    """Compile Python to C#"""
+    log_info("Compiling...")
     try:
-        if not Path(compiler.INPUT_FILE).exists():
-            log_error(f"{compiler.INPUT_FILE} not found!")
-            log_info("Run 'dukpyra init' first")
-            raise typer.Exit(code=1)
-        
-        ensure_services_dir()
-        if not ensure_dotnet_project():
-            raise typer.Exit(code=1)
-        
-        # Compile (suppress output)
-        log_info("Compiling Python → C#...")
-        import io
-        from contextlib import redirect_stdout
-        f = io.StringIO()
-        with redirect_stdout(f):
-            compiler.dukpyra_compile()
-        
-        log_success(f"{Style.BOLD}Build completed!{Style.RESET}")
-        print(f"\n  {Style.GRAY}Output:{Style.RESET} {Style.CYAN}{compiler.OUTPUT_FILE}{Style.RESET}\n")
-        
+        compiler.dukpyra_compile()
+        log_success("Compilation successful!")
     except Exception as e:
-        log_error(f"Build failed: {e}")
+        log_error(f"Compilation failed: {e}")
         raise typer.Exit(code=1)
-
-
-def monitor_dotnet_output(process, port: int, https: bool):
-    """Monitor .NET process output and show our styled messages"""
-    global server_ready
-    
-    while process.poll() is None:
-        line = process.stdout.readline()
-        if line:
-            line = line.strip()
-            
-            # Detect server ready (from .NET runtime)
-            if "Now listening on:" in line:
-                server_ready = True
-                print_server_ready(port, https)
-            
-            # Detect dotnet watch build
-            elif "dotnet watch" in line.lower():
-                if "Build succeeded" in line:
-                    log_success("Build succeeded")
-                elif "Building" in line and ".csproj" in line:
-                    log_info("Building .NET project...")
-                elif "Hot reload" in line:
-                    log_info("Hot reload enabled")
-                elif "File changed:" in line:
-                    log_info("File changed, reloading...")
-            
-            # Detect build errors
-            elif "error CS" in line or "error:" in line.lower():
-                # แสดง error แบบย่อ
-                if "error CS" in line:
-                    log_error(line.split(": error")[1] if ": error" in line else line)
-                else:
-                    log_error(line)
-            
-            # Detect build failure
-            elif "build failed" in line.lower():
-                log_error("Build failed!")
-            
-            # Debug: uncomment to see all output
-            # else:
-            #     print(f"{Style.DIM}{line}{Style.RESET}")
 
 
 @app.command()
 def run(
-    port: int = typer.Option(DEFAULT_PORT, "--port", "-p", help="Port to run the server on"),
-    https: bool = typer.Option(False, "--https", help="Enable HTTPS"),
+    port: int = typer.Option(DEFAULT_PORT, help="Port to run the server on"),
+    https: bool = typer.Option(False, help="Enable HTTPS"),
 ):
-    """Run the compiled .NET server"""
-    csproj_path = SERVICES_DIR / f"{PROJECT_NAME}.csproj"
-    
-    if not csproj_path.exists():
-        log_error("No .NET project found! Run 'dukpyra build' first.")
+    """Run the production server"""
+    if not (SERVICES_DIR / f"{PROJECT_NAME}.csproj").exists():
+        log_error("Project not initialized. Run 'dukpyra init' first.")
         raise typer.Exit(code=1)
-    
-    program_cs = SERVICES_DIR / "Program.cs"
-    if not program_cs.exists():
-        log_error("No Program.cs found! Run 'dukpyra build' first.")
-        raise typer.Exit(code=1)
+        
+    log_server(f"Starting production server on port {port}...")
     
     protocol = "https" if https else "http"
-    urls = f"{protocol}://localhost:{port}"
-    
-    log_info("Starting server...")
-    
-    env = os.environ.copy()
-    env["ASPNETCORE_URLS"] = urls
-    env["DOTNET_NOLOGO"] = "1"
-    
     try:
-        process = subprocess.Popen(
-            ["dotnet", "run", "--no-launch-profile"],
-            cwd=str(SERVICES_DIR),
-            env=env,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
+        subprocess.run(
+            ["dotnet", "run", "--project", f"services/{PROJECT_NAME}.csproj", "--urls", f"{protocol}://localhost:{port}"],
+            check=True
         )
-        
-        # Monitor output in background
-        monitor_thread = threading.Thread(
-            target=monitor_dotnet_output,
-            args=(process, port, https),
-            daemon=True,
-        )
-        monitor_thread.start()
-        
-        # Wait for process
-        process.wait()
-        
     except KeyboardInterrupt:
-        print(f"\n{Style.GRAY}Shutting down...{Style.RESET}")
-        if process:
-            process.terminate()
-        log_success("Server stopped")
-    except Exception as e:
-        log_error(f"Server error: {e}")
+        print()
+        log_info("Server stopped.")
+    except subprocess.CalledProcessError:
+        log_error("Failed to run server.")
         raise typer.Exit(code=1)
 
 
-def run_dotnet_background(port: int = DEFAULT_PORT, https: bool = False):
-    """รัน .NET server แบบ background (สำหรับ dev mode)"""
-    global dotnet_process, server_ready
-    server_ready = False
-
-    # Kill old process ถ้ามี
-    if dotnet_process:
-        log_info("Restarting server...")
-        dotnet_process.terminate()
-        try:
-            dotnet_process.wait(timeout=5)
-        except subprocess.TimeoutExpired:
-            dotnet_process.kill()
-
-    protocol = "https" if https else "http"
-    urls = f"{protocol}://localhost:{port}"
+class ReloadHandler(FileSystemEventHandler):
+    """Watch files and trigger recompile + restart"""
     
-    env = os.environ.copy()
-    env["ASPNETCORE_URLS"] = urls
-    env["DOTNET_NOLOGO"] = "1"
+    def __init__(self, restart_callback):
+        super().__init__()
+        self.restart_callback = restart_callback
+        self._debounce_timer = None
     
-    dotnet_process = subprocess.Popen(
-        ["dotnet", "run", "--no-launch-profile"],
-        cwd=str(SERVICES_DIR),
-        env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-    )
-    
-    # Monitor output in background
-    monitor_thread = threading.Thread(
-        target=monitor_dotnet_output,
-        args=(dotnet_process, port, https),
-        daemon=True,
-    )
-    monitor_thread.start()
-
-
-def compile_only():
-    """Compile input.py -> Program.cs (without restarting server)"""
-    import io
-    from contextlib import redirect_stdout
-    f = io.StringIO()
-    with redirect_stdout(f):
-        compiler.dukpyra_compile()
-
-
-def run_dotnet_watch(port: int = DEFAULT_PORT, https: bool = False):
-    """รัน dotnet watch run (hot reload built-in)"""
-    global dotnet_process, server_ready
-    server_ready = False
-
-    protocol = "https" if https else "http"
-    urls = f"{protocol}://localhost:{port}"
-    
-    env = os.environ.copy()
-    env["ASPNETCORE_URLS"] = urls
-    env["DOTNET_NOLOGO"] = "1"
-    env["DOTNET_WATCH_SUPPRESS_EMOJIS"] = "1"
-    
-    # ส่ง --urls ไปที่ app โดยตรง
-    dotnet_process = subprocess.Popen(
-        ["dotnet", "watch", "run", "--no-launch-profile", "--", "--urls", urls],
-        cwd=str(SERVICES_DIR),
-        env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-    )
-    
-    # Monitor output in background
-    monitor_thread = threading.Thread(
-        target=monitor_dotnet_output,
-        args=(dotnet_process, port, https),
-        daemon=True,
-    )
-    monitor_thread.start()
-
-
-class CodeChangeHandler(FileSystemEventHandler):
-    def __init__(self):
-        self.last_modified = 0
-        self.debounce_seconds = 0.5
-
     def on_modified(self, event):
+        # Watch both input.py and generated C# files
         if event.src_path.endswith("input.py"):
-            current_time = time.time()
-            if current_time - self.last_modified > self.debounce_seconds:
-                self.last_modified = current_time
+            log_info("Detected change in input.py")
+            try:
+                compiler.dukpyra_compile()
+                log_success("Re-compiled successfully!")
+                self._trigger_restart()
+            except Exception as e:
+                log_error(f"Re-compilation failed: {e}")
+        elif event.src_path.endswith(".cs"):
+            log_info("Detected change in C# files")
+            self._trigger_restart()
+    
+    def _trigger_restart(self):
+        """Debounced restart to avoid multiple restarts"""
+        if self._debounce_timer:
+            self._debounce_timer.cancel()
+        self._debounce_timer = threading.Timer(0.5, self.restart_callback)
+        self._debounce_timer.start()
+
+
+class DotnetRunner:
+    """Manages dotnet run process with restart capability"""
+    
+    def __init__(self, port: int, https: bool = False):
+        self.port = port
+        self.https = https
+        self.process = None
+        self._lock = threading.Lock()
+    
+    def start(self):
+        """Start the dotnet server"""
+        with self._lock:
+            if self.process:
+                self.stop()
+            
+            protocol = "https" if self.https else "http"
+            cmd = [
+                "dotnet", "run",
+                "--project", f"services/{PROJECT_NAME}.csproj",
+                "--urls", f"{protocol}://localhost:{self.port}"
+            ]
+            
+            self.process = subprocess.Popen(cmd)
+            log_info("Starting .NET server...")
+    
+    def stop(self):
+        """Stop the dotnet server"""
+        with self._lock:
+            if self.process:
+                self.process.terminate()
                 try:
-                    log_info("Change detected, recompiling...")
-                    compile_only()
-                    log_success("Compiled → dotnet watch will reload")
-                except Exception as e:
-                    log_error(f"Compile failed: {e}")
+                    self.process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    self.process.kill()
+                self.process = None
+    
+    def restart(self):
+        """Restart the dotnet server"""
+        log_info("Restarting .NET server...")
+        self.stop()
+        time.sleep(0.5)  # Brief pause before restart
+        self.start()
+    
+    def wait(self):
+        """Wait for process to complete"""
+        if self.process:
+            self.process.wait()
 
 
 @app.command()
 def dev(
-    port: int = typer.Option(DEFAULT_PORT, "--port", "-p", help="Port to run the server on"),
-    https: bool = typer.Option(False, "--https", help="Enable HTTPS"),
-    build_first: bool = typer.Option(True, "--build/--no-build", "-b", help="Build before starting"),
+    port: int = typer.Option(DEFAULT_PORT, help="Port to run the server on"),
+    https: bool = typer.Option(False, help="Enable HTTPS"),
 ):
-    """Start development mode with hot reload 🔥"""
+    """Run development server with hot reload"""
     print_banner()
     
-    print(f"  {Style.PURPLE}▸{Style.RESET} {Style.BOLD}Dev Mode{Style.RESET}")
-    print(f"  {Style.GRAY}─────────────────────────{Style.RESET}")
-    print(f"  {Style.GRAY}Port:{Style.RESET}       {Style.CYAN}{port}{Style.RESET}")
-    print(f"  {Style.GRAY}HTTPS:{Style.RESET}      {Style.CYAN}{'Yes' if https else 'No'}{Style.RESET}")
-    print(f"  {Style.GRAY}Hot Reload:{Style.RESET} {Style.GREEN}Enabled (.NET Watch){Style.RESET}")
-    print()
-
-    ensure_services_dir()
-    if not ensure_dotnet_project():
-        raise typer.Exit(code=1)
-
-    if build_first:
-        log_info("Initial build...")
-        try:
-            compile_only()
-            log_success("Compiled successfully")
-        except Exception as e:
-            log_error(f"Initial build failed: {e}")
-            raise typer.Exit(code=1)
-
-    # Start dotnet watch (it will auto-reload when Program.cs changes)
-    run_dotnet_watch(port, https)
-
-    # Watch input.py for changes
-    log_info(f"Watching {Style.BOLD}input.py{Style.RESET} for changes...")
+    # 1. Build first
+    build()
     
-    event_handler = CodeChangeHandler()
+    # 2. Create dotnet runner
+    runner = DotnetRunner(port, https)
+    
+    # 3. Setup Watchdog for input.py -> compile -> restart
+    event_handler = ReloadHandler(restart_callback=runner.restart)
     observer = Observer()
     observer.schedule(event_handler, path=".", recursive=False)
+    observer.schedule(event_handler, path="services", recursive=True)
     observer.start()
-
+    
+    log_info("Watching 'input.py' and 'services/' for changes...")
+    
+    print_server_ready(port, https)
+    
+    # 4. Start dotnet run (not watch!)
+    runner.start()
+    
     try:
+        # Keep running until Ctrl+C
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print(f"\n{Style.GRAY}Shutting down...{Style.RESET}")
+        pass
+    finally:
+        runner.stop()
         observer.stop()
-        if dotnet_process:
-            dotnet_process.terminate()
-        log_success("Server stopped. Goodbye! 👋")
-    observer.join()
+        observer.join()
+        print()
+        log_info("Development server stopped.")
 
 
 @app.command()
 def clean():
-    """Remove the services/ directory and all generated files"""
+    """Clean generated files"""
     if SERVICES_DIR.exists():
-        confirm = typer.confirm(f"Delete {SERVICES_DIR}/ directory?")
-        if confirm:
-            shutil.rmtree(SERVICES_DIR)
-            log_success(f"Removed {SERVICES_DIR}/")
-        else:
-            log_info("Cancelled")
+        shutil.rmtree(SERVICES_DIR)
+        log_success("Cleaned services/ directory")
     else:
-        log_info(f"{SERVICES_DIR}/ does not exist")
+        log_info("Nothing to clean")
+
+
+@app.command()
+def restart():
+    """Rebuild and restart (use during dev server)"""
+    log_info("Rebuilding...")
+    try:
+        compiler.dukpyra_compile()
+        log_success("Rebuild complete! Server will restart automatically if running in dev mode.")
+    except Exception as e:
+        log_error(f"Rebuild failed: {e}")
+        raise typer.Exit(code=1)
 
 
 @app.command()
 def version():
-    """Show Dukpyra version"""
-    print(f"\n  {Style.PURPLE}{Style.BOLD}🔮 Dukpyra{Style.RESET} {Style.GRAY}v0.1.0{Style.RESET}")
-    print(f"  {Style.GRAY}Framework{Style.RESET}\n")
+    """Show version"""
+    # Should probably read from pyproject.toml but hardcoding for now as per README
+    print(f"Dukpyra v0.00001")
 
 
 if __name__ == "__main__":
