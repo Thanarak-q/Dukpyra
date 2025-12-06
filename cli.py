@@ -75,7 +75,7 @@ def print_banner():
     ╔══════════════════════════════════════════╗
     ║                                          ║
     ║      🔮  D U K P Y R A                   ║
-    ║         Python → C# JIT Compiler         ║
+    ║              Framework                   ║
     ║                                          ║
     ╚══════════════════════════════════════════╝
 {Style.RESET}"""
@@ -98,7 +98,7 @@ def print_server_ready(port: int, https: bool = False):
 # ==============================================
 app = typer.Typer(
     name="dukpyra",
-    help="🔮 Dukpyra - Python to C# JIT Compiler",
+    help="🔮 Dukpyra - Framework",
     add_completion=False,
 )
 
@@ -480,7 +480,7 @@ def clean():
 def version():
     """Show Dukpyra version"""
     print(f"\n  {Style.PURPLE}{Style.BOLD}🔮 Dukpyra{Style.RESET} {Style.GRAY}v0.1.0{Style.RESET}")
-    print(f"  {Style.GRAY}Python → C# JIT Compiler{Style.RESET}\n")
+    print(f"  {Style.GRAY}Framework{Style.RESET}\n")
 
 
 if __name__ == "__main__":

@@ -26,3 +26,4 @@
 /home/rock/Documents/Dukpyra/services/obj/Debug/net10.0/DukpyraApp.pdb
 /home/rock/Documents/Dukpyra/services/obj/Debug/net10.0/DukpyraApp.genruntimeconfig.cache
 /home/rock/Documents/Dukpyra/services/obj/Debug/net10.0/ref/DukpyraApp.dll
+/home/rock/Documents/Dukpyra/services/obj/Debug/net10.0/DukpyraApp.sourcelink.json
