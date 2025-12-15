@@ -35,6 +35,9 @@ from .ast import (
     DictExpr,
     DictItemNode,
     ListExpr,
+    GenericEndpointNode,
+    ListCompNode,
+    BinaryOpExpr,
 )
 
 
@@ -112,7 +115,7 @@ class SymbolTable:
     """
     classes: Dict[str, ClassDefNode] = field(default_factory=dict)
     endpoints: Dict[str, EndpointNode] = field(default_factory=dict)
-    builtin_types: Set[str] = field(default_factory=lambda: {"int", "str", "float", "bool"})
+    builtin_types: Set[str] = field(default_factory=lambda: {"int", "str", "float", "bool", "list", "dict"})
 
 
 # ==============================================================================
@@ -182,11 +185,11 @@ class SemanticAnalyzer:
             else:
                 self.symbols.classes[cls.name] = cls
     
-    def _collect_endpoints(self, endpoints: List[EndpointNode]) -> None:
+    def _collect_endpoints(self, endpoints: List[GenericEndpointNode]) -> None:
         """Collect all endpoints and check for duplicates."""
         for endpoint in endpoints:
-            method = endpoint.decorator.method.upper()
-            path = endpoint.decorator.path
+            method = endpoint.method.upper()
+            path = endpoint.path
             key = f"{method} {path}"
             
             if key in self.symbols.endpoints:
@@ -233,18 +236,17 @@ class SemanticAnalyzer:
     # Endpoint Validation
     # ==========================================================================
     
-    def _validate_endpoints(self, endpoints: List[EndpointNode]) -> None:
+    def _validate_endpoints(self, endpoints: List[GenericEndpointNode]) -> None:
         """Validate all endpoints."""
         for endpoint in endpoints:
             self._validate_endpoint(endpoint)
     
-    def _validate_endpoint(self, endpoint: EndpointNode) -> None:
+    def _validate_endpoint(self, endpoint: GenericEndpointNode) -> None:
         """Validate a single endpoint."""
-        decorator = endpoint.decorator
-        function = endpoint.function
+        function = endpoint.handler
         
         # Extract path parameters like {user_id} from path
-        path_params = self._extract_path_params(decorator.path)
+        path_params = self._extract_path_params(endpoint.path)
         
         # Get function parameter names
         func_params = {p.name for p in function.params}
@@ -254,7 +256,7 @@ class SemanticAnalyzer:
             if path_param not in func_params:
                 self._error(
                     f"Path parameter '{{{path_param}}}' not found in function '{function.name}'",
-                    decorator.lineno,
+                    endpoint.lineno,
                     "E010"
                 )
         
@@ -304,6 +306,23 @@ class SemanticAnalyzer:
         elif isinstance(expr, ListExpr):
             for item in expr.items:
                 self._validate_expression(item, scope)
+
+        elif isinstance(expr, BinaryOpExpr):
+            self._validate_expression(expr.left, scope)
+            self._validate_expression(expr.right, scope)
+
+        elif isinstance(expr, ListCompNode):
+            # [expr for target in iterable if condition]
+            # Validate iterable in CURRENT scope
+            self._validate_expression(expr.iterable, scope)
+            
+            # Create NEW scope for expression and condition (includes target)
+            inner_scope = scope.copy()
+            inner_scope.add(expr.target)
+            
+            self._validate_expression(expr.expression, inner_scope)
+            if expr.condition:
+                self._validate_expression(expr.condition, inner_scope)
     
     # ==========================================================================
     # Helper Methods

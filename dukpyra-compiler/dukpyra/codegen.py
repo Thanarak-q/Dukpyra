@@ -147,6 +147,8 @@ class CSharpCodeGenerator:
             "str": "string",
             "float": "double",
             "bool": "bool",
+            "list": "List<dynamic>",
+            "dict": "Dictionary<string, dynamic>",
         }
         
         if python_type is None:
