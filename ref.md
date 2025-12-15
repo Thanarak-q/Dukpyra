@@ -59,3 +59,22 @@ This section collects representative implementations, their outcomes, and emergi
 - **Cubix language-parametric transformations** James Koppel, Varot Premtoon, and Armando Solar-Lezama demonstrate that incremental parametric syntax enables multi-language refactorings that preserve readability and structure, validated by human studies and compiler test suites [3].  
 - **Emerging trends** The corpus points to several converging directions: **unsupervised neural translation and large-scale multilingual benchmarks** to reduce parallel-data dependence [1] [8], **language-parametric and reusable AST representations** to scale transformations across languages [3], **user-in-the-loop and incremental rule systems** to manage edge cases and increase correctness [4], and **integrating platform abstraction with transpilation** for end-to-end portability (Basilisk) [2].  
 - **Insufficient evidence** While the papers illustrate many promising directions, comprehensive solutions that fully automate translation of all dynamic-language idioms to fully-typed static equivalents across arbitrary language pairs are not demonstrated within the provided corpus.
+
+
+References
+[1]
+M.-A. Lachaux, B. Roziere, L. Chanussot, and G. Lample, “Unsupervised Translation of Programming Languages,” arXiv: Computation and Language, June 2020.
+[2]
+F. Bertolotti, W. Cazzola, D. Ostuni, and C. Castoldi, “When the dragons defeat the knight: Basilisk an architectural pattern for platform and language independent development,” Journal of Systems and Software, May 2024, doi: 10.1016/j.jss.2024.112088.
+[3]
+J. Koppel, V. Premtoon, and A. S. Lezama, “One tool, many languages: language-parametric transformation with incremental parametric syntax,” Oct. 2018.
+[4]
+“User-Customizable Transpilation of Scripting Languages,” Jan. 2023, doi: 10.48550/arxiv.2301.11220.
+[5]
+R. Eikermann, K. Hölldobler, A. Roth, and B. Rumpe, “Reuse and Customization for Code Generators: Synergy by Transformations and Templates,” pp. 34–55, Jan. 2018, doi: 10.1007/978-3-030-11030-7_3.
+[6]
+“Runtime type collecting and transpilation to a static language”, [Online]. Available: https://ceur-ws.org/Vol-3893/Paper08.pdf
+[7]
+M. Bysiek, M. Wahib, A. Drozd, and S. Matsuoka, “Towards Portable High Performance in Python: Transpilation, High-Level IR, Code Transformations and Compiler Directives,” no. 38, pp. 1–7, July 2018.
+[8]
+“MultiPL-E: A Scalable and Extensible Approach to Benchmarking Neural  Code Generation,” Aug. 2022, doi: 10.48550/arxiv.2208.08227.

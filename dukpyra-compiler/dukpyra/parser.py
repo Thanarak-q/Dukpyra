@@ -33,6 +33,8 @@ from .ast import (
     DictExpr,
     DictItemNode,
     ListExpr,
+    ListCompNode,
+    BinaryOpExpr,
     IdentifierExpr,
     MemberAccessExpr,
 )
@@ -323,7 +325,41 @@ def p_expression_empty_dict(p):
     p[0] = DictExpr(items=[], lineno=p.lineno(1))
 
 
+def p_expression_binary_op(p):
+    """expression : expression STAR expression
+                  | expression GT expression
+                  | expression LT expression
+                  | expression EQ expression
+                  | expression NE expression
+                  | expression GE expression
+                  | expression LE expression"""
+    p[0] = BinaryOpExpr(
+        left=p[1],
+        op=p[2],
+        right=p[3],
+        lineno=p.lineno(1)
+    )
+
+
 # 2.6.2 List Expressions: [1, 2, 3] or ["a", "b", "c"]
+def p_expression_list_comp(p):
+    """expression : LBRACKET expression FOR ID IN expression optional_if RBRACKET"""
+    p[0] = ListCompNode(
+        expression=p[2],
+        target=p[4],
+        iterable=p[6],
+        condition=p[7],
+        lineno=p.lineno(1)
+    )
+
+def p_optional_if_present(p):
+    """optional_if : IF expression"""
+    p[0] = p[2]
+
+def p_optional_if_empty(p):
+    """optional_if : """
+    p[0] = None
+
 def p_expression_list(p):
     """expression : LBRACKET list_items RBRACKET"""
     p[0] = ListExpr(items=p[2], lineno=p.lineno(1))
@@ -404,6 +440,16 @@ def p_error(p):
 # ==============================================================================
 # Create Parser
 # ==============================================================================
+
+# ==============================================================================
+# Create Parser
+# ==============================================================================
+
+# Precedence rules
+precedence = (
+    ('left', 'EQ', 'NE', 'GT', 'LT', 'GE', 'LE'),
+    ('left', 'STAR'),
+)
 
 parser = yacc.yacc()
 

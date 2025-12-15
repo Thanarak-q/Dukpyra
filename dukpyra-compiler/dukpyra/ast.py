@@ -281,6 +281,38 @@ class ListExpr(ExpressionNode):
     items: List[ExpressionNode] = field(default_factory=list)
 
 
+@dataclass
+class ListCompNode(ExpressionNode):
+    """
+    List Comprehension: [x * 2 for x in items if x > 5]
+    
+    Attributes:
+        expression: The output expression (x * 2)
+        target: The loop variable name ("x")
+        iterable: The source list ("items")
+        condition: Optional filter expression (x > 5)
+    """
+    expression: ExpressionNode = None
+    target: str = ""
+    iterable: ExpressionNode = None
+    condition: Optional[ExpressionNode] = None
+
+
+@dataclass
+class BinaryOpExpr(ExpressionNode):
+    """
+    Binary operation: x * 2, a + b, x > 5
+    
+    Attributes:
+        left: Left operand
+        op: Operator (+, -, *, /, >, <, ==, etc.)
+        right: Right operand
+    """
+    left: ExpressionNode = None
+    op: str = ""
+    right: ExpressionNode = None
+
+
 # ==============================================================================
 # Helper Functions
 # ==============================================================================

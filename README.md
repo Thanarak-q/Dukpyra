@@ -55,10 +55,12 @@ This project is developed as part of a **compiler construction research** explor
 
 โปรเจกต์นี้ได้รับการออกแบบโดยอ้างอิงงานวิจัยด้าน Compiler Engineering สมัยใหม่:
 
-1.  **Runtime Type Collection (Dynamic to Static)**: ใช้การเก็บข้อมูลขณะรันไทม์เพื่อแปลงโค้ด Dynamic Typing ของ Python เป็น Static Typing ของ C# ได้อย่างแม่นยำ *[6] P. Krivanek and R. Uttner*
-2.  **Templates and transformation synergy**: แยก Tramsformation Logic ออกจาก Code Generation โดยใช้ Template Engine (Jinja2) ตามแนวทางของ *[5] Robert Eikermann et al.* ทำให้โครงสร้างโค้ดปลายทางยืดหยุ่นกว่าการต่อ String
-3.  **User-guided "Last Mile" construction**: แก้ปัญหาที่ Compiler แปลง Logic ซับซ้อนไม่ได้ทั้งหมดด้วยฟีเจอร์ "Raw C# Injection" ตามแนวคิดของ *[4] DuoGlot (Bo Wang et al.)*
-4.  **Rule-driven AST rewriting**: ใช้พื้นฐานการแปลงแบบ Rule-based ตามมาตรฐานงานวิจัยของ *[1] Lachaux et al.*
+1.  **Runtime Type Collection (Dynamic to Static)**: ใช้การเก็บข้อมูลขณะรันไทม์เพื่อแปลงโค้ด Dynamic Typing ของ Python เป็น Static Typing ของ C# ได้อย่างแม่นยำ *[6]*
+2.  **Templates and transformation synergy**: แยก Tramsformation Logic ออกจาก Code Generation โดยใช้ Template Engine (Jinja2) ตามแนวทางของ *[5]* ทำให้โครงสร้างโค้ดปลายทางยืดหยุ่นกว่าการต่อ String
+3.  **User-guided "Last Mile" construction**: แก้ปัญหาที่ Compiler แปลง Logic ซับซ้อนไม่ได้ทั้งหมดด้วยฟีเจอร์ "Raw C# Injection" ตามแนวคิดของ *[4]*
+4.  **Rule-driven AST rewriting**: ใช้พื้นฐานการแปลงแบบ Rule-based ตามมาตรฐานงานวิจัยของ *[1]*
+5.  **High-Level IR Optimization**: มอง Python เป็น High-Level IR เพื่อแปลง Structure ที่ซับซ้อน (เช่น List Comprehension) ให้เป็น Optimized Code (LINQ) ตามแนวทางของ *[7]*
+
 
 ## 🏗️ Architecture
 
@@ -112,6 +114,13 @@ def get_user(id: int):
 @app.post("/users")
 def create_user(body: CreateUser):
     return {"created": True, "name": body.name}
+
+# Optimized LINQ generation
+@app.get("/active-users")
+def get_active_users(users: list):
+    # Python: List Comprehension
+    # C#: users.Where(u => u.active).Select(u => u.name).ToList()
+    return [u.name for u in users if u.active]
 ```
 
 ### Feature Matrix
@@ -128,6 +137,7 @@ def create_user(body: CreateUser):
 | None | ✅ | `None` → `null` |
 | Semantic Analysis | ✅ | Error detection with line numbers |
 | **Runtime Profiling** | ✅ | `dukpyra profile` → Auto-detect `int`/`bool` |
+| **High-Level IR (LINQ)** | ✅ | `[x for x in list]` → `list.Select(...)` |
 
 ### Semantic Validation
 
@@ -266,6 +276,19 @@ MIT License
 > **Duk** (ดุ๊ก) + **Py**thon + C sha**rp** = **Dukpyra** 🔮
 
 ---
+
+
+## 📚 References
+
+[1] M.-A. Lachaux, B. Roziere, L. Chanussot, and G. Lample, “Unsupervised Translation of Programming Languages,” *arXiv: Computation and Language*, June 2020.
+
+[4] “User-Customizable Transpilation of Scripting Languages,” Jan. 2023, doi: 10.48550/arxiv.2301.11220.
+
+[5] R. Eikermann, K. Hölldobler, A. Roth, and B. Rumpe, “Reuse and Customization for Code Generators: Synergy by Transformations and Templates,” pp. 34–55, Jan. 2018, doi: 10.1007/978-3-030-11030-7_3.
+
+[6] “Runtime type collecting and transpilation to a static language”, [Online]. Available: https://ceur-ws.org/Vol-3893/Paper08.pdf
+
+[7] M. Bysiek, M. Wahib, A. Drozd, and S. Matsuoka, “Towards Portable High Performance in Python: Transpilation, High-Level IR, Code Transformations and Compiler Directives,” no. 38, pp. 1–7, July 2018.
 
 <p align="center">
   <b>Version 0.3.0 - Research Build</b>

@@ -32,6 +32,11 @@ reserved = {
     "str": "TYPE_STR",
     "float": "TYPE_FLOAT",
     "bool": "TYPE_BOOL",
+    
+    # Control Flow
+    "for": "FOR",
+    "in": "IN",
+    "if": "IF",
 }
 
 # 1.2 รายชื่อ Token ทั้งหมด (Token List)
@@ -51,6 +56,13 @@ tokens = [
     "DOT",      # .
     "EQUALS",   # =
     "NEWLINE",  # \n
+    "STAR",     # *
+    "GT",       # >
+    "LT",       # <
+    "EQ",       # ==
+    "NE",       # !=
+    "GE",       # >=
+    "LE",       # <=
 ] + list(reserved.values())
 
 # 1.3 กฎการตัดคำแบบง่าย (Simple Regex Rules)
@@ -65,6 +77,13 @@ t_COMMA = r","
 t_AT = r"@"
 t_DOT = r"\."
 t_EQUALS = r"="
+t_STAR = r"\*"
+t_GT = r">"
+t_LT = r"<"
+t_EQ = r"=="
+t_NE = r"!="
+t_GE = r">="
+t_LE = r"<="
 t_ignore = " \t"
 
 # 1.4 กฎการตัดคำแบบซับซ้อน (Function Rules)

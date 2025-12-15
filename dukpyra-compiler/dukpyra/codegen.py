@@ -34,6 +34,8 @@ from .ast import (
     DictExpr,
     DictItemNode,
     ListExpr,
+    ListCompNode,
+    BinaryOpExpr,
 )
 
 class CSharpCodeGenerator:
@@ -181,6 +183,10 @@ class CSharpCodeGenerator:
             return self.visit_dict(node)
         elif isinstance(node, ListExpr):
             return self.visit_list(node)
+        elif isinstance(node, ListCompNode):
+            return self.visit_list_comp(node)
+        elif isinstance(node, BinaryOpExpr):
+            return self.visit_binary_op(node)
         else:
             raise ValueError(f"Unknown expression type: {type(node)}")
     
@@ -221,7 +227,42 @@ class CSharpCodeGenerator:
             return "Array.Empty<object>()"
         
         items = [self.visit_expression(item) for item in node.items]
+        items = [self.visit_expression(item) for item in node.items]
         return "new[] { " + ", ".join(items) + " }"
+
+    def visit_list_comp(self, node: ListCompNode) -> str:
+        """
+        Generate LINQ expression for list comprehension.
+        Python: [expr for target in iterable if condition]
+        C#: iterable.Where(target => condition).Select(target => expr).ToList()
+        """
+        iterable = self.visit_expression(node.iterable)
+        target = node.target
+        
+        # Start LINQ chain
+        linq = iterable
+        
+        # Add .Where(...) if condition exists
+        if node.condition:
+            condition_expr = self.visit_expression(node.condition)
+            linq += f".Where({target} => {condition_expr})"
+            
+        # Add .Select(...)
+        select_expr = self.visit_expression(node.expression)
+        linq += f".Select({target} => {select_expr})"
+        
+        # Finalize
+        linq += ".ToList()"
+        
+        return linq
+
+    def visit_binary_op(self, node: BinaryOpExpr) -> str:
+        """
+        Generate C# binary operation string.
+        """
+        left = self.visit_expression(node.left)
+        right = self.visit_expression(node.right)
+        return f"{left} {node.op} {right}"
 
 
 def generate_csharp(program: ProgramNode) -> str:
