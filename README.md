@@ -1,140 +1,173 @@
-# 🔮 Dukpyra Framework
+# 🔮 Dukpyra
 
 <p align="center">
-  <img src="mascot.png" alt="Dukpyra Mascot" width="800">
+  <img src="mascot.png" alt="Dukpyra Mascot" width="600">
 </p>
 
-> **The Pythonic Web Framework powered by .NET**  
-> เขียนแบบ Python รันด้วยพลัง .NET
+> **Python-to-C# Transpiler for Web APIs**  
+> เขียน API ด้วย Python syntax รันบน .NET runtime
 
-[![Version](https://img.shields.io/badge/version-0.00001-purple.svg)](https://github.com/Thanarak-q/Dukpyra)
+[![Version](https://img.shields.io/badge/version-0.3.0-purple.svg)](https://github.com/Thanarak-q/Dukpyra)
 [![Python](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
-[![.NET](https://img.shields.io/badge/.NET-10-purple.svg)](https://dotnet.microsoft.com/)
+[![.NET](https://img.shields.io/badge/.NET-8+-purple.svg)](https://dotnet.microsoft.com/)
 
 ---
 
-## 🤔 What is Dukpyra?
+## 📚 Research Context
 
-**Dukpyra** คือ Web Framework ที่ให้คุณเขียน API ด้วย Python syntax แต่รันบน .NET runtime ทำให้ได้ performance ระดับ production 
+This project is developed as part of a **compiler construction research** exploring the feasibility of:
 
-เขียน API แบบนี้ใน Python:
+1. **Cross-language transpilation** - Converting Python web API definitions to C# ASP.NET Core
+2. **Domain-specific language design** - Creating a Python DSL for web API development
+3. **Semantic analysis** - Implementing validation and error detection before code generation
 
-```python
-@app.get("/")
-def index():
-    return {"message": "Hello from Dukpyra! 🔮"}
+### Research Objectives
 
-@app.get("/health")
-def health():
-    return {"status": "ok", "version": "1.0"}
+| Objective | Description |
+|-----------|-------------|
+| **RO1** | Design a lexer and parser for Python API syntax using PLY |
+| **RO2** | Implement an Abstract Syntax Tree (AST) representation |
+| **RO3** | Create a semantic analyzer for validation |
+| **RO4** | Generate correct C# code from AST |
+| **RO5** | Evaluate the transpiler with real-world API patterns |
+
+### Scope & Limitations
+
+**In Scope:**
+- HTTP methods: GET, POST, PUT, DELETE, PATCH
+- Path and query parameters with type hints
+- Request/response bodies via class definitions
+- Basic data types: int, str, float, bool, list, dict
+- Semantic validation: duplicates, undefined refs, type checking
+
+**Out of Scope:**
+- Full Python language support (only API subset)
+- Async/await patterns
+- Middleware and dependency injection
+- Database integration
+- Authentication/Authorization
+
+---
+
+## 🏗️ Architecture
+
+Dukpyra implements a **5-stage compiler pipeline**:
+
+```
+┌────────────────────────────────────────────────────────────────────┐
+│                   DUKPYRA COMPILER v0.3.0                          │
+├────────────────────────────────────────────────────────────────────┤
+│                                                                    │
+│  Python   ┌────────┐  ┌────────┐  ┌─────┐  ┌──────────┐  ┌──────┐ │
+│  Source ─▶│ Lexer  │─▶│ Parser │─▶│ AST │─▶│ Analyzer │─▶│CodeGen│─▶ C#
+│           │ (PLY)  │  │ (LALR) │  │     │  │          │  │      │ │
+│           └────────┘  └────────┘  └─────┘  └──────────┘  └──────┘ │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
-แล้ว Dukpyra จะ **compile เป็น C#** และรันบน **.NET runtime** ให้อัตโนมัติ!
+| Stage | File | Lines | Description |
+|-------|------|-------|-------------|
+| Lexer | `lexer.py` | 116 | Tokenizes Python source into tokens |
+| Parser | `parser.py` | 450 | Builds AST using LALR(1) grammar |
+| AST | `ast.py` | 330 | Node definitions (15 types) |
+| Analyzer | `analyzer.py` | 300 | Semantic validation (7 error types) |
+| CodeGen | `codegen.py` | 330 | Generates C# from AST |
+
+**Total: ~2,100 lines of code**
 
 ---
 
-## ⚡ Features
+## ✅ Current Features (v0.3.0)
 
-| Feature | Description |
-|---------|-------------|
-| 🐍 **Python Syntax** | เขียน API ด้วย syntax ที่คุ้นเคย ไม่ต้องเรียน C# |
-| 🚀 **.NET Performance** | รันบน ASP.NET Core ได้ performance ระดับ production |
-| 🔥 **Hot Reload** | แก้ code แล้ว server reload อัตโนมัติ |
-| 📦 **Zero Config** | `dukpyra init` แล้วเริ่มเขียนได้เลย |
-| 🔄 **Type Safety** | รองรับ Python type hints → C# types |
-| 🎯 **Framework-first** | ออกแบบมาเพื่อเป็น framework ไม่ใช่แค่ transpiler |
+### Supported Syntax
+
+```python
+# Python-style imports and app creation
+import dukpyra
+app = dukpyra.app()
+
+# Request body classes → C# records
+class CreateUser:
+    name: str
+    email: str
+    age: int
+
+# HTTP endpoints with decorators
+@app.get("/users/{id}")
+def get_user(id: int):
+    return {"id": id, "name": "John"}
+
+@app.post("/users")
+def create_user(body: CreateUser):
+    return {"created": True, "name": body.name}
+```
+
+### Feature Matrix
+
+| Feature | Status | Example |
+|---------|--------|---------|
+| GET/POST/PUT/DELETE/PATCH | ✅ | `@app.get("/path")` |
+| Path Parameters | ✅ | `/users/{id}` |
+| Query Parameters | ✅ | `def search(q: str):` |
+| Type Hints | ✅ | `int`, `str`, `float`, `bool` |
+| Request Bodies | ✅ | `class Model:` → C# record |
+| Lists | ✅ | `[1, 2, 3]` → `new[] {...}` |
+| Booleans | ✅ | `True`/`False` → `true`/`false` |
+| None | ✅ | `None` → `null` |
+| Semantic Analysis | ✅ | Error detection with line numbers |
+
+### Semantic Validation
+
+| Error Code | Description |
+|------------|-------------|
+| E001 | Duplicate class definition |
+| E002 | Duplicate endpoint (method + path) |
+| E003 | Duplicate property in class |
+| E004 | Unknown type in class property |
+| E010 | Path parameter not in function |
+| E011 | Unknown type in parameter |
+| E020 | Undefined variable reference |
 
 ---
 
-## 🚀 Quick Start
+## � Quick Start
 
-### 1. Prerequisites
+### Prerequisites
 
 - Python 3.9+
-- .NET SDK 10+ ([ดาวน์โหลด](https://dotnet.microsoft.com/download))
+- .NET SDK 8+ ([Download](https://dotnet.microsoft.com/download))
 
-### 2. Install Dukpyra
+### Installation
 
 ```bash
-# Clone or download the project
-git clone https://github.com/rock/dukpyra.git
-cd dukpyra
+# Clone the repository
+git clone https://github.com/Thanarak-q/Dukpyra.git
+cd Dukpyra/dukpyra-compiler
 
-# Install as CLI tool (editable mode for development)
+# Install as CLI tool
 pip install -e .
 ```
 
-### 3. Initialize Project
+### Usage
 
 ```bash
+# Initialize new project
 dukpyra init
-```
 
-### 4. Start Development Server
+# Run development server with hot reload
+dukpyra run
 
-```bash
-dukpyra dev
-```
+# Build only (no run)
+dukpyra build
 
-Server จะรันที่ `http://localhost:5000` 🎉
-
----
-
-## 📝 Usage
-
-### Available Commands
-
-| Command | Description |
-|---------|-------------|
-| `dukpyra init` | สร้างโครงสร้างโปรเจกต์ใหม่ |
-| `dukpyra dev` | รัน development server พร้อม hot reload |
-| `dukpyra build` | Compile Python → C# |
-| `dukpyra run` | รัน production server |
-| `dukpyra clean` | ลบ generated files ทั้งหมด |
-| `dukpyra version` | แสดงเวอร์ชัน |
-
-### Options
-
-```bash
-# เปลี่ยน port
-dukpyra dev --port 8080
-
-# Enable HTTPS
-dukpyra dev --https
-
-# Skip initial build
-dukpyra dev --no-build
+# Clean generated files
+dukpyra clean
 ```
 
 ---
 
-## 🔧 How It Works
-
-Dukpyra ทำงานเป็น **compile-time framework** ที่แปลง Python ไป C#:
-
-```
-┌─────────────┐     ┌──────────────┐     ┌─────────────────┐
-│  input.py   │ ──▶ │   Dukpyra     │ ──▶ │   Program.cs    │
-│  (Python)   │     │   Compiler    │     │   (C#)          │
-└─────────────┘     └──────────────┘     └────────┴────────┘
-                                                  │
-                                                  ▼
-                                         ┌─────────────────┐
-                                         │  .NET Runtime   │
-                                         │  (ASP.NET Core) │
-                                         └─────────────────┘
-```
-
-1. **Parse** - อ่าน Python code และสร้าง AST
-2. **Transform** - แปลง Python → C#
-3. **Generate** - สร้าง ASP.NET Core app
-4. **Run** - รันบน .NET runtime
-
----
-
-## 🗺️ Type Mapping
-
-Dukpyra แปลง Python type hints ไปเป็น C# types อัตโนมัติ:
+## 📊 Type Mapping
 
 | Python | C# |
 |--------|-----|
@@ -142,77 +175,77 @@ Dukpyra แปลง Python type hints ไปเป็น C# types อัตโ�
 | `int` | `int` |
 | `float` | `double` |
 | `bool` | `bool` |
-| `List[str]` | `List<string>` |
-| `Optional[int]` | `int?` |
-| `Dict[str, int]` | `Dictionary<string, int>` |
-| `datetime` | `DateTime` |
+| `None` | `null` |
+| `list` | `new[] {...}` |
+| `dict` | `new {...}` |
+| Custom class | `public record` |
+
+---
+
+## 🔜 Future Work
+
+### Short Term
+- [ ] Default parameter values
+- [ ] Negative numbers
+- [ ] Response type annotations
+
+### Medium Term
+- [ ] HTTP status codes
+- [ ] Middleware support
+- [ ] Error handling patterns
+
+### Long Term
+- [ ] Async/await support
+- [ ] Database integration
+- [ ] Swagger generation
 
 ---
 
 ## 📁 Project Structure
 
 ```
-my-project/
-├── input.py              # 📝 Your Python API definitions
-├── cli.py                # 🛠️ Dukpyra CLI
-├── compiler.py           # ⚙️ Python → C# compiler
-└── services/             # 📦 Generated .NET project
-    ├── Program.cs        # 🎯 Generated C# code
-    ├── DukpyraApp.csproj # 📋 .NET project file
-    └── ...
+Dukpyra/
+├── dukpyra-compiler/          # Compiler source
+│   └── dukpyra/
+│       ├── lexer.py           # Tokenizer
+│       ├── parser.py          # Grammar → AST
+│       ├── ast.py             # AST node definitions
+│       ├── analyzer.py        # Semantic analysis
+│       ├── codegen.py         # AST → C#
+│       └── cli.py             # CLI commands
+├── my-test-backend/           # Example project
+│   └── main.py                # Sample API
+└── README.md
 ```
 
 ---
 
-## 💡 Examples
+## 🧪 Testing
 
-### Basic GET Endpoint
+```bash
+# Run with test backend
+cd my-test-backend
+dukpyra run
 
-```python
-@app.get("/hello")
-def hello():
-    return {"message": "Hello, World!"}
-```
-
-### With Parameters (Coming Soon)
-
-```python
-@app.get("/users/{user_id}")
-def get_user(user_id: int):
-    return {"user_id": user_id}
-```
-
-### POST Endpoint (Coming Soon)
-
-```python
-@app.post("/items")
-def create_item(name: str, price: float):
-    return {"name": name, "price": price}
+# Test endpoints
+curl http://localhost:5000/
+curl http://localhost:5000/users/123
+curl -X POST http://localhost:5000/users \
+  -H "Content-Type: application/json" \
+  -d '{"name":"John","email":"john@test.com","age":30}'
 ```
 
 ---
 
-## 🔜 Roadmap
-
-- [ ] POST, PUT, DELETE methods
-- [ ] Query parameters
-- [ ] Request body parsing
-- [ ] Middleware support
-- [ ] Database integration
-- [ ] Auto-generate Swagger docs
-- [ ] Docker support
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! นี่คือ v0.00001 ยังมีอะไรให้ทำอีกเยอะ 😄
-
----
-
-## 📄 License
+## � License
 
 MIT License
+
+---
+
+## 👨‍💻 Author
+
+**Rock** - Compiler Design Research Project
 
 ---
 
@@ -222,23 +255,6 @@ MIT License
 
 ---
 
-## 🌟 Vision
-
-> 🌱 **v0.00001** — Foundation release  
-> 🚀 **v1.0.0** — Full-stack Web Framework
-
-**Dukpyra** ถูกออกแบบมาเป็น **framework เต็มรูปแบบ** ตั้งแต่แรก:
-
-- 🎨 เขียน Backend ด้วย Python syntax ที่คุ้นเคย
-- ⚡ รันด้วย .NET 10 performance ระดับ production
-- 🔌 Ecosystem ของ plugins และ extensions
-- 🛠️ Built-in: Database, Auth, Caching, Validation
-- 📦 Deploy-ready: Docker, Kubernetes, Cloud
-
-**This is just the beginning.** �
-
----
-
 <p align="center">
-  <b>Made with 💜 by Rock</b>
+  <b>Version 0.3.0 - Research Build</b>
 </p>
