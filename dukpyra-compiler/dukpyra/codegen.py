@@ -2,14 +2,16 @@
 Dukpyra Code Generator - AST to C# Transpiler
 
 This module walks the AST and generates C# code for ASP.NET Core Minimal API.
+It uses Jinja2 templates for the final code output.
 
 Architecture:
-    Source Code → Lexer → Parser → AST → CodeGen → C# Code
-                                          ^^^^^^^
-                                          This module
+    Source Code → Lexer → Parser → AST → CodeGen → C# Code (via Templates)
 """
 
-from typing import List
+import os
+from typing import List, Dict, Any
+from jinja2 import Environment, FileSystemLoader
+
 from .ast import (
     Node,
     ProgramNode,
@@ -38,17 +40,14 @@ class CSharpCodeGenerator:
     """
     Generates C# ASP.NET Core Minimal API code from Dukpyra AST.
     
-    Uses the Visitor pattern to traverse the AST.
-    
-    Usage:
-        ast = parser.parse(source_code)
-        generator = CSharpCodeGenerator()
-        csharp_code = generator.generate(ast)
+    Uses the Visitor pattern to prepare data for Jinja2 templates.
     """
     
     def __init__(self):
-        self.indent_level = 0
-        self.indent_str = "    "  # 4 spaces
+        # Setup Jinja2 environment
+        template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+        self.env = Environment(loader=FileSystemLoader(template_dir))
+        self.template = self.env.get_template('Program.cs.j2')
     
     def generate(self, program: ProgramNode) -> str:
         """
@@ -59,47 +58,19 @@ class CSharpCodeGenerator:
         if program is None:
             return ""
         
-        lines = []
+        # Prepare data for template
+        classes = [self.visit_class(c) for c in program.classes]
+        endpoints = [self.visit_endpoint(e) for e in program.endpoints]
         
-        # Generate C# record types from class definitions
-        for class_def in program.classes:
-            lines.append(self.visit_class(class_def))
-        
-        if program.classes:
-            lines.append("")  # Blank line after records
-        
-        # Header
-        lines.extend([
-            "var builder = WebApplication.CreateBuilder(args);",
-            "var app = builder.Build();",
-            "",
-            "// --- Dukpyra Generated Routes ---",
-        ])
-        
-        # Generate each endpoint
-        for endpoint in program.endpoints:
-            lines.append(self.visit_endpoint(endpoint))
-        
-        # Footer
-        lines.extend([
-            "// --------------------------------",
-            "",
-            "app.Run();",
-        ])
-        
-        return "\n".join(lines)
+        # Render template
+        return self.template.render(
+            classes=classes,
+            endpoints=endpoints
+        )
     
     def visit_class(self, node: ClassDefNode) -> str:
         """
-        Generate C# record type from class definition.
-        
-        Input (Python):
-            class CreateUser:
-                name: str
-                email: str
-        
-        Output (C#):
-            public record CreateUser(string name, string email);
+        Generate C# record type definition string.
         """
         params = []
         for prop in node.properties:
@@ -109,38 +80,25 @@ class CSharpCodeGenerator:
         params_str = ", ".join(params)
         return f"public record {node.name}({params_str});"
     
-    def visit_endpoint(self, node: EndpointNode) -> str:
+    def visit_endpoint(self, node: EndpointNode) -> Dict[str, str]:
         """
-        Generate C# code for an endpoint.
-        
-        Input (Python):
-            @app.get("/users/{id}")
-            def get_user(id: int):
-                return {"user_id": id}
-        
-        Output (C#):
-            app.MapGet("/users/{id}", (int id) =>
-            {
-                return Results.Ok(new { user_id = id });
-            });
+        Prepare endpoint data for template.
         """
-        method = node.decorator.method.capitalize()  # get -> Get
+        method = node.decorator.method.capitalize()
         path = node.decorator.path
         params = self.visit_params(node.function.params)
         body = self.visit_function_body(node.function)
         
-        return f'''
-app.Map{method}("{path}", ({params}) =>
-{{
-    {body}
-}});'''
+        return {
+            "method": method,
+            "path": path,
+            "params": params,
+            "body": body
+        }
     
     def visit_params(self, params: list) -> str:
         """
-        Generate C# lambda parameter list.
-        
-        Input (Python): [ParameterNode(name="id", type_hint="int")]
-        Output (C#):    "int id"
+        Generate C# lambda parameter list string.
         """
         if not params:
             return ""
@@ -155,13 +113,6 @@ app.Map{method}("{path}", ({params}) =>
     def python_type_to_csharp(self, python_type: str) -> str:
         """
         Convert Python type hint to C# type.
-        
-        Python -> C#:
-            int    -> int
-            str    -> string
-            float  -> double
-            bool   -> bool
-            None   -> dynamic (for untyped parameters)
         """
         type_map = {
             "int": "int",
@@ -171,15 +122,13 @@ app.Map{method}("{path}", ({params}) =>
         }
         
         if python_type is None:
-            return "dynamic"  # Untyped parameter
+            return "dynamic"
         
         return type_map.get(python_type, python_type)
     
     def visit_function_body(self, node: FunctionDefNode) -> str:
         """
         Generate C# code for function body.
-        
-        Currently only supports return statements.
         """
         if node.body is None:
             return "return Results.Ok();"
@@ -211,71 +160,26 @@ app.Map{method}("{path}", ({params}) =>
             raise ValueError(f"Unknown expression type: {type(node)}")
     
     def visit_string(self, node: StringExpr) -> str:
-        """
-        Convert Python string to C# string.
-        
-        Python: "hello"
-        C#:     "hello"
-        """
         # Escape special characters for C#
         escaped = node.value.replace("\\", "\\\\").replace('"', '\\"')
         return f'"{escaped}"'
     
     def visit_number(self, node: NumberExpr) -> str:
-        """
-        Convert Python number to C# number.
-        
-        Python: 42 or 3.14
-        C#:     42 or 3.14
-        """
         return str(node.value)
     
     def visit_bool(self, node: BoolExpr) -> str:
-        """
-        Convert Python bool to C# bool.
-        
-        Python: True / False
-        C#:     true / false
-        """
         return "true" if node.value else "false"
     
     def visit_none(self, node: NoneExpr) -> str:
-        """
-        Convert Python None to C# null.
-        
-        Python: None
-        C#:     (object?)null
-        
-        Note: We use (object?)null because C# anonymous types
-        cannot infer the type from just 'null'.
-        """
         return "(object?)null"
     
     def visit_identifier(self, node: IdentifierExpr) -> str:
-        """
-        Convert Python identifier (variable reference).
-        
-        Python: user_id
-        C#:     user_id
-        """
         return node.name
     
     def visit_member_access(self, node: MemberAccessExpr) -> str:
-        """
-        Convert Python member access (body.name).
-        
-        Python: body.name
-        C#:     body.name
-        """
         return f"{node.object_name}.{node.member_name}"
     
     def visit_dict(self, node: DictExpr) -> str:
-        """
-        Convert Python dict to C# anonymous object.
-        
-        Python: {"name": "John", "age": 30}
-        C#:     new { name = "John", age = 30 }
-        """
         if not node.items:
             return "new { }"
         
@@ -288,16 +192,6 @@ app.Map{method}("{path}", ({params}) =>
         return "new { " + ", ".join(items) + " }"
     
     def visit_list(self, node: ListExpr) -> str:
-        """
-        Convert Python list to C# array.
-        
-        Python: [1, 2, 3]
-        C#:     new[] { 1, 2, 3 }
-        
-        Empty list:
-        Python: []
-        C#:     Array.Empty<object>()
-        """
         if not node.items:
             return "Array.Empty<object>()"
         
@@ -305,17 +199,9 @@ app.Map{method}("{path}", ({params}) =>
         return "new[] { " + ", ".join(items) + " }"
 
 
-# ==============================================================================
-# Convenience Function
-# ==============================================================================
-
 def generate_csharp(program: ProgramNode) -> str:
     """
     Convenience function to generate C# code from AST.
-    
-    Usage:
-        from dukpyra.codegen import generate_csharp
-        csharp_code = generate_csharp(ast)
     """
     generator = CSharpCodeGenerator()
     return generator.generate(program)
