@@ -168,14 +168,33 @@ def p_endpoints_single(p):
     p[0] = [p[1]]
 
 
-# 2.3 Endpoint: decorator + function
-def p_endpoint(p):
+# 2.3 Endpoint: decorator + function (optional raw_csharp decorator)
+def p_endpoint_with_raw(p):
+    """endpoint : raw_decorator decorator function_def"""
+    p[0] = EndpointNode(
+        decorator=p[2],
+        function=p[3],
+        raw_csharp=p[1],
+        lineno=p[2].lineno if p[2] else 0
+    )
+
+
+def p_endpoint_normal(p):
     """endpoint : decorator function_def"""
     p[0] = EndpointNode(
         decorator=p[1],
         function=p[2],
+        raw_csharp=None,
         lineno=p[1].lineno if p[1] else 0
     )
+
+
+def p_raw_decorator(p):
+    """raw_decorator : AT ID DOT ID LPAREN STRING RPAREN NEWLINE"""
+    if p[2] == 'dukpyra' and p[4] == 'raw_csharp':
+        p[0] = p[6]
+    else:
+        p[0] = None
 
 
 # 2.4 Decorators: @app.method("/path")

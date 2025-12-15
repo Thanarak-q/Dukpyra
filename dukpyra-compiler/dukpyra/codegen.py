@@ -87,7 +87,11 @@ class CSharpCodeGenerator:
         method = node.decorator.method.capitalize()
         path = node.decorator.path
         params = self.visit_params(node.function.params)
-        body = self.visit_function_body(node.function)
+        
+        if node.raw_csharp:
+            body = node.raw_csharp
+        else:
+            body = self.visit_function_body(node.function)
         
         return {
             "method": method,

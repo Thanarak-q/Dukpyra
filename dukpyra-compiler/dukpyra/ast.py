@@ -124,6 +124,7 @@ class EndpointNode(Node):
     """
     decorator: 'DecoratorNode' = None
     function: 'FunctionDefNode' = None
+    raw_csharp: Optional[str] = None
 
 
 @dataclass  
