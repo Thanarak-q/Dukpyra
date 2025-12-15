@@ -41,7 +41,7 @@ class ProgramNode(Node):
     imports: List['ImportNode'] = field(default_factory=list)
     app_creation: Optional['AppCreationNode'] = None
     classes: List['ClassDefNode'] = field(default_factory=list)
-    endpoints: List['EndpointNode'] = field(default_factory=list)
+    endpoints: List['GenericEndpointNode'] = field(default_factory=list)
 
 
 @dataclass
@@ -125,6 +125,21 @@ class EndpointNode(Node):
     decorator: 'DecoratorNode' = None
     function: 'FunctionDefNode' = None
     raw_csharp: Optional[str] = None
+
+@dataclass
+class GenericEndpointNode(Node):
+    """
+    Represents a platform-agnostic API endpoint.
+    Abstractions [2]: Decouples logic from Python decorator syntax.
+    
+    Attributes:
+        method: HTTP method (normalized to uppercase: GET, POST)
+        path: URL path (e.g., "/users")
+        handler: The function handling the request
+    """
+    method: str = ""
+    path: str = ""
+    handler: 'FunctionDefNode' = None
 
 
 @dataclass  

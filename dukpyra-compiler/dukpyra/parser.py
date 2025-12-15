@@ -22,7 +22,8 @@ from .ast import (
     AppCreationNode,
     ClassDefNode,
     ClassPropertyNode,
-    EndpointNode,
+    ClassPropertyNode,
+    GenericEndpointNode,
     DecoratorNode,
     FunctionDefNode,
     ParameterNode,
@@ -170,24 +171,19 @@ def p_endpoints_single(p):
     p[0] = [p[1]]
 
 
-# 2.3 Endpoint: decorator + function (optional raw_csharp decorator)
-def p_endpoint_with_raw(p):
-    """endpoint : raw_decorator decorator function_def"""
-    p[0] = EndpointNode(
-        decorator=p[2],
-        function=p[3],
-        raw_csharp=p[1],
-        lineno=p[2].lineno if p[2] else 0
-    )
-
-
-def p_endpoint_normal(p):
+# 2.3 Endpoint: decorator + function
+def p_endpoint(p):
     """endpoint : decorator function_def"""
-    p[0] = EndpointNode(
-        decorator=p[1],
-        function=p[2],
-        raw_csharp=None,
-        lineno=p[1].lineno if p[1] else 0
+    # Transform decorator + function into a Generic Node immediately
+    # This abstracts away the "decorator" concept from the main AST
+    decorator = p[1]
+    function = p[2]
+    
+    p[0] = GenericEndpointNode(
+        method=decorator.method.upper(),
+        path=decorator.path,
+        handler=function,
+        lineno=decorator.lineno
     )
 
 

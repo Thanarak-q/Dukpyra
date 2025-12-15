@@ -20,7 +20,8 @@ from .ast import (
     AppCreationNode,
     ClassDefNode,
     ClassPropertyNode,
-    EndpointNode,
+    ClassPropertyNode,
+    GenericEndpointNode,
     DecoratorNode,
     FunctionDefNode,
     ParameterNode,
@@ -94,20 +95,20 @@ class CSharpCodeGenerator:
         params_str = ", ".join(params)
         return f"public record {node.name}({params_str});"
 
-    def visit_endpoint(self, node: EndpointNode) -> Dict[str, str]:
+    def visit_endpoint(self, node: GenericEndpointNode) -> Dict[str, str]:
         """
         Prepare endpoint data for template.
+        Works with GenericEndpointNode now, decoupled from decorators.
         """
-        method = node.decorator.method.capitalize()
-        path = node.decorator.path
+        method = node.method.capitalize()
+        path = node.path
         
         # Pass function name to visit_params to lookup types
-        params = self.visit_params(node.function.params, func_name=node.function.name)
+        params = self.visit_params(node.handler.params, func_name=node.handler.name)
         
-        if node.raw_csharp:
-            body = node.raw_csharp
-        else:
-            body = self.visit_function_body(node.function)
+        # In generic node, raw_csharp would need a different mechanism
+        # For now we assume standard body generation
+        body = self.visit_function_body(node.handler)
         
         return {
             "method": method,
