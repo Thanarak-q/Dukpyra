@@ -1,16 +1,9 @@
 Created by PLY version 3.11 (http://www.dabeaz.com/ply)
 
-Unused terminals:
-
-    TYPE_BOOL
-    TYPE_FLOAT
-    TYPE_INT
-    TYPE_STR
-
 Grammar
 
 Rule 0     S' -> program
-Rule 1     program -> preamble endpoints
+Rule 1     program -> preamble class_definitions endpoints
 Rule 2     preamble -> optional_newlines import_stmt app_creation
 Rule 3     preamble -> optional_newlines import_stmt
 Rule 4     preamble -> optional_newlines
@@ -18,72 +11,112 @@ Rule 5     import_stmt -> IMPORT ID NEWLINE optional_newlines
 Rule 6     app_creation -> ID EQUALS ID DOT ID LPAREN RPAREN NEWLINE optional_newlines
 Rule 7     optional_newlines -> <empty>
 Rule 8     optional_newlines -> NEWLINE optional_newlines
-Rule 9     endpoints -> endpoint endpoints
-Rule 10    endpoints -> endpoint
-Rule 11    endpoint -> decorator function_def
-Rule 12    decorator -> AT ID DOT GET LPAREN STRING RPAREN NEWLINE
-Rule 13    decorator -> AT ID DOT POST LPAREN STRING RPAREN NEWLINE
-Rule 14    decorator -> AT ID DOT PUT LPAREN STRING RPAREN NEWLINE
-Rule 15    decorator -> AT ID DOT DELETE LPAREN STRING RPAREN NEWLINE
-Rule 16    decorator -> AT ID DOT PATCH LPAREN STRING RPAREN NEWLINE
-Rule 17    function_def -> DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE
-Rule 18    expression -> STRING
-Rule 19    expression -> NUMBER
-Rule 20    expression -> LBRACE dict_items RBRACE
-Rule 21    dict_items -> dict_item COMMA dict_items
-Rule 22    dict_items -> dict_item
-Rule 23    dict_item -> STRING COLON expression
+Rule 9     class_definitions -> class_definition class_definitions
+Rule 10    class_definitions -> <empty>
+Rule 11    class_definition -> CLASS ID COLON NEWLINE class_properties
+Rule 12    class_properties -> class_property class_properties
+Rule 13    class_properties -> class_property
+Rule 14    class_property -> ID COLON type_hint NEWLINE
+Rule 15    endpoints -> endpoint endpoints
+Rule 16    endpoints -> endpoint
+Rule 17    endpoint -> decorator function_def
+Rule 18    decorator -> AT ID DOT GET LPAREN STRING RPAREN NEWLINE
+Rule 19    decorator -> AT ID DOT POST LPAREN STRING RPAREN NEWLINE
+Rule 20    decorator -> AT ID DOT PUT LPAREN STRING RPAREN NEWLINE
+Rule 21    decorator -> AT ID DOT DELETE LPAREN STRING RPAREN NEWLINE
+Rule 22    decorator -> AT ID DOT PATCH LPAREN STRING RPAREN NEWLINE
+Rule 23    function_def -> DEF ID LPAREN params RPAREN COLON NEWLINE RETURN expression NEWLINE
+Rule 24    function_def -> DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE
+Rule 25    params -> param COMMA params
+Rule 26    params -> param
+Rule 27    param -> ID COLON type_hint
+Rule 28    param -> ID
+Rule 29    type_hint -> TYPE_INT
+Rule 30    type_hint -> TYPE_STR
+Rule 31    type_hint -> TYPE_FLOAT
+Rule 32    type_hint -> TYPE_BOOL
+Rule 33    type_hint -> ID
+Rule 34    expression -> STRING
+Rule 35    expression -> NUMBER
+Rule 36    expression -> LBRACE dict_items RBRACE
+Rule 37    expression -> LBRACE RBRACE
+Rule 38    expression -> LBRACKET list_items RBRACKET
+Rule 39    expression -> LBRACKET RBRACKET
+Rule 40    list_items -> expression COMMA list_items
+Rule 41    list_items -> expression
+Rule 42    expression -> ID
+Rule 43    expression -> ID DOT ID
+Rule 44    expression -> TRUE
+Rule 45    expression -> FALSE
+Rule 46    expression -> NONE
+Rule 47    dict_items -> dict_item COMMA dict_items
+Rule 48    dict_items -> dict_item
+Rule 49    dict_item -> STRING COLON expression
 
 Terminals, with rules where they appear
 
-AT                   : 12 13 14 15 16
-COLON                : 17 23
-COMMA                : 21
-DEF                  : 17
-DELETE               : 15
-DOT                  : 6 12 13 14 15 16
+AT                   : 18 19 20 21 22
+CLASS                : 11
+COLON                : 11 14 23 24 27 49
+COMMA                : 25 40 47
+DEF                  : 23 24
+DELETE               : 21
+DOT                  : 6 18 19 20 21 22 43
 EQUALS               : 6
-GET                  : 12
-ID                   : 5 6 6 6 12 13 14 15 16 17
+FALSE                : 45
+GET                  : 18
+ID                   : 5 6 6 6 11 14 18 19 20 21 22 23 24 27 28 33 42 43 43
 IMPORT               : 5
-LBRACE               : 20
-LPAREN               : 6 12 13 14 15 16 17
-NEWLINE              : 5 6 8 12 13 14 15 16 17 17
-NUMBER               : 19
-PATCH                : 16
-POST                 : 13
-PUT                  : 14
-RBRACE               : 20
-RETURN               : 17
-RPAREN               : 6 12 13 14 15 16 17
-STRING               : 12 13 14 15 16 18 23
-TYPE_BOOL            : 
-TYPE_FLOAT           : 
-TYPE_INT             : 
-TYPE_STR             : 
+LBRACE               : 36 37
+LBRACKET             : 38 39
+LPAREN               : 6 18 19 20 21 22 23 24
+NEWLINE              : 5 6 8 11 14 18 19 20 21 22 23 23 24 24
+NONE                 : 46
+NUMBER               : 35
+PATCH                : 22
+POST                 : 19
+PUT                  : 20
+RBRACE               : 36 37
+RBRACKET             : 38 39
+RETURN               : 23 24
+RPAREN               : 6 18 19 20 21 22 23 24
+STRING               : 18 19 20 21 22 34 49
+TRUE                 : 44
+TYPE_BOOL            : 32
+TYPE_FLOAT           : 31
+TYPE_INT             : 29
+TYPE_STR             : 30
 error                : 
 
 Nonterminals, with rules where they appear
 
 app_creation         : 2
-decorator            : 11
-dict_item            : 21 22
-dict_items           : 20 21
-endpoint             : 9 10
-endpoints            : 1 9
-expression           : 17 23
-function_def         : 11
+class_definition     : 9
+class_definitions    : 1 9
+class_properties     : 11 12
+class_property       : 12 13
+decorator            : 17
+dict_item            : 47 48
+dict_items           : 36 47
+endpoint             : 15 16
+endpoints            : 1 15
+expression           : 23 24 40 41 49
+function_def         : 17
 import_stmt          : 2 3
+list_items           : 38 40
 optional_newlines    : 2 3 4 5 6 8
+param                : 25 26
+params               : 23 25
 preamble             : 1
 program              : 0
+type_hint            : 14 27
 
 Parsing method: LALR
 
 state 0
 
     (0) S' -> . program
-    (1) program -> . preamble endpoints
+    (1) program -> . preamble class_definitions endpoints
     (2) preamble -> . optional_newlines import_stmt app_creation
     (3) preamble -> . optional_newlines import_stmt
     (4) preamble -> . optional_newlines
@@ -91,6 +124,7 @@ state 0
     (8) optional_newlines -> . NEWLINE optional_newlines
 
     IMPORT          reduce using rule 7 (optional_newlines -> .)
+    CLASS           reduce using rule 7 (optional_newlines -> .)
     AT              reduce using rule 7 (optional_newlines -> .)
     NEWLINE         shift and go to state 4
 
@@ -106,21 +140,16 @@ state 1
 
 state 2
 
-    (1) program -> preamble . endpoints
-    (9) endpoints -> . endpoint endpoints
-    (10) endpoints -> . endpoint
-    (11) endpoint -> . decorator function_def
-    (12) decorator -> . AT ID DOT GET LPAREN STRING RPAREN NEWLINE
-    (13) decorator -> . AT ID DOT POST LPAREN STRING RPAREN NEWLINE
-    (14) decorator -> . AT ID DOT PUT LPAREN STRING RPAREN NEWLINE
-    (15) decorator -> . AT ID DOT DELETE LPAREN STRING RPAREN NEWLINE
-    (16) decorator -> . AT ID DOT PATCH LPAREN STRING RPAREN NEWLINE
+    (1) program -> preamble . class_definitions endpoints
+    (9) class_definitions -> . class_definition class_definitions
+    (10) class_definitions -> .
+    (11) class_definition -> . CLASS ID COLON NEWLINE class_properties
 
-    AT              shift and go to state 8
+    AT              reduce using rule 10 (class_definitions -> .)
+    CLASS           shift and go to state 7
 
-    endpoints                      shift and go to state 5
-    endpoint                       shift and go to state 6
-    decorator                      shift and go to state 7
+    class_definitions              shift and go to state 5
+    class_definition               shift and go to state 6
 
 state 3
 
@@ -129,10 +158,11 @@ state 3
     (4) preamble -> optional_newlines .
     (5) import_stmt -> . IMPORT ID NEWLINE optional_newlines
 
+    CLASS           reduce using rule 4 (preamble -> optional_newlines .)
     AT              reduce using rule 4 (preamble -> optional_newlines .)
-    IMPORT          shift and go to state 10
+    IMPORT          shift and go to state 9
 
-    import_stmt                    shift and go to state 9
+    import_stmt                    shift and go to state 8
 
 state 4
 
@@ -141,571 +171,1113 @@ state 4
     (8) optional_newlines -> . NEWLINE optional_newlines
 
     IMPORT          reduce using rule 7 (optional_newlines -> .)
+    CLASS           reduce using rule 7 (optional_newlines -> .)
     AT              reduce using rule 7 (optional_newlines -> .)
     ID              reduce using rule 7 (optional_newlines -> .)
     NEWLINE         shift and go to state 4
 
-    optional_newlines              shift and go to state 11
+    optional_newlines              shift and go to state 10
 
 state 5
 
-    (1) program -> preamble endpoints .
+    (1) program -> preamble class_definitions . endpoints
+    (15) endpoints -> . endpoint endpoints
+    (16) endpoints -> . endpoint
+    (17) endpoint -> . decorator function_def
+    (18) decorator -> . AT ID DOT GET LPAREN STRING RPAREN NEWLINE
+    (19) decorator -> . AT ID DOT POST LPAREN STRING RPAREN NEWLINE
+    (20) decorator -> . AT ID DOT PUT LPAREN STRING RPAREN NEWLINE
+    (21) decorator -> . AT ID DOT DELETE LPAREN STRING RPAREN NEWLINE
+    (22) decorator -> . AT ID DOT PATCH LPAREN STRING RPAREN NEWLINE
 
-    $end            reduce using rule 1 (program -> preamble endpoints .)
+    AT              shift and go to state 14
 
+    endpoints                      shift and go to state 11
+    endpoint                       shift and go to state 12
+    decorator                      shift and go to state 13
 
 state 6
 
-    (9) endpoints -> endpoint . endpoints
-    (10) endpoints -> endpoint .
-    (9) endpoints -> . endpoint endpoints
-    (10) endpoints -> . endpoint
-    (11) endpoint -> . decorator function_def
-    (12) decorator -> . AT ID DOT GET LPAREN STRING RPAREN NEWLINE
-    (13) decorator -> . AT ID DOT POST LPAREN STRING RPAREN NEWLINE
-    (14) decorator -> . AT ID DOT PUT LPAREN STRING RPAREN NEWLINE
-    (15) decorator -> . AT ID DOT DELETE LPAREN STRING RPAREN NEWLINE
-    (16) decorator -> . AT ID DOT PATCH LPAREN STRING RPAREN NEWLINE
+    (9) class_definitions -> class_definition . class_definitions
+    (9) class_definitions -> . class_definition class_definitions
+    (10) class_definitions -> .
+    (11) class_definition -> . CLASS ID COLON NEWLINE class_properties
 
-    $end            reduce using rule 10 (endpoints -> endpoint .)
-    AT              shift and go to state 8
+    AT              reduce using rule 10 (class_definitions -> .)
+    CLASS           shift and go to state 7
 
-    endpoint                       shift and go to state 6
-    endpoints                      shift and go to state 12
-    decorator                      shift and go to state 7
+    class_definition               shift and go to state 6
+    class_definitions              shift and go to state 15
 
 state 7
 
-    (11) endpoint -> decorator . function_def
-    (17) function_def -> . DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE
+    (11) class_definition -> CLASS . ID COLON NEWLINE class_properties
 
-    DEF             shift and go to state 14
+    ID              shift and go to state 16
 
-    function_def                   shift and go to state 13
 
 state 8
-
-    (12) decorator -> AT . ID DOT GET LPAREN STRING RPAREN NEWLINE
-    (13) decorator -> AT . ID DOT POST LPAREN STRING RPAREN NEWLINE
-    (14) decorator -> AT . ID DOT PUT LPAREN STRING RPAREN NEWLINE
-    (15) decorator -> AT . ID DOT DELETE LPAREN STRING RPAREN NEWLINE
-    (16) decorator -> AT . ID DOT PATCH LPAREN STRING RPAREN NEWLINE
-
-    ID              shift and go to state 15
-
-
-state 9
 
     (2) preamble -> optional_newlines import_stmt . app_creation
     (3) preamble -> optional_newlines import_stmt .
     (6) app_creation -> . ID EQUALS ID DOT ID LPAREN RPAREN NEWLINE optional_newlines
 
+    CLASS           reduce using rule 3 (preamble -> optional_newlines import_stmt .)
     AT              reduce using rule 3 (preamble -> optional_newlines import_stmt .)
-    ID              shift and go to state 17
-
-    app_creation                   shift and go to state 16
-
-state 10
-
-    (5) import_stmt -> IMPORT . ID NEWLINE optional_newlines
-
     ID              shift and go to state 18
 
+    app_creation                   shift and go to state 17
 
-state 11
+state 9
 
-    (8) optional_newlines -> NEWLINE optional_newlines .
-
-    IMPORT          reduce using rule 8 (optional_newlines -> NEWLINE optional_newlines .)
-    AT              reduce using rule 8 (optional_newlines -> NEWLINE optional_newlines .)
-    ID              reduce using rule 8 (optional_newlines -> NEWLINE optional_newlines .)
-
-
-state 12
-
-    (9) endpoints -> endpoint endpoints .
-
-    $end            reduce using rule 9 (endpoints -> endpoint endpoints .)
-
-
-state 13
-
-    (11) endpoint -> decorator function_def .
-
-    AT              reduce using rule 11 (endpoint -> decorator function_def .)
-    $end            reduce using rule 11 (endpoint -> decorator function_def .)
-
-
-state 14
-
-    (17) function_def -> DEF . ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE
+    (5) import_stmt -> IMPORT . ID NEWLINE optional_newlines
 
     ID              shift and go to state 19
 
 
+state 10
+
+    (8) optional_newlines -> NEWLINE optional_newlines .
+
+    IMPORT          reduce using rule 8 (optional_newlines -> NEWLINE optional_newlines .)
+    CLASS           reduce using rule 8 (optional_newlines -> NEWLINE optional_newlines .)
+    AT              reduce using rule 8 (optional_newlines -> NEWLINE optional_newlines .)
+    ID              reduce using rule 8 (optional_newlines -> NEWLINE optional_newlines .)
+
+
+state 11
+
+    (1) program -> preamble class_definitions endpoints .
+
+    $end            reduce using rule 1 (program -> preamble class_definitions endpoints .)
+
+
+state 12
+
+    (15) endpoints -> endpoint . endpoints
+    (16) endpoints -> endpoint .
+    (15) endpoints -> . endpoint endpoints
+    (16) endpoints -> . endpoint
+    (17) endpoint -> . decorator function_def
+    (18) decorator -> . AT ID DOT GET LPAREN STRING RPAREN NEWLINE
+    (19) decorator -> . AT ID DOT POST LPAREN STRING RPAREN NEWLINE
+    (20) decorator -> . AT ID DOT PUT LPAREN STRING RPAREN NEWLINE
+    (21) decorator -> . AT ID DOT DELETE LPAREN STRING RPAREN NEWLINE
+    (22) decorator -> . AT ID DOT PATCH LPAREN STRING RPAREN NEWLINE
+
+    $end            reduce using rule 16 (endpoints -> endpoint .)
+    AT              shift and go to state 14
+
+    endpoint                       shift and go to state 12
+    endpoints                      shift and go to state 20
+    decorator                      shift and go to state 13
+
+state 13
+
+    (17) endpoint -> decorator . function_def
+    (23) function_def -> . DEF ID LPAREN params RPAREN COLON NEWLINE RETURN expression NEWLINE
+    (24) function_def -> . DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE
+
+    DEF             shift and go to state 22
+
+    function_def                   shift and go to state 21
+
+state 14
+
+    (18) decorator -> AT . ID DOT GET LPAREN STRING RPAREN NEWLINE
+    (19) decorator -> AT . ID DOT POST LPAREN STRING RPAREN NEWLINE
+    (20) decorator -> AT . ID DOT PUT LPAREN STRING RPAREN NEWLINE
+    (21) decorator -> AT . ID DOT DELETE LPAREN STRING RPAREN NEWLINE
+    (22) decorator -> AT . ID DOT PATCH LPAREN STRING RPAREN NEWLINE
+
+    ID              shift and go to state 23
+
+
 state 15
 
-    (12) decorator -> AT ID . DOT GET LPAREN STRING RPAREN NEWLINE
-    (13) decorator -> AT ID . DOT POST LPAREN STRING RPAREN NEWLINE
-    (14) decorator -> AT ID . DOT PUT LPAREN STRING RPAREN NEWLINE
-    (15) decorator -> AT ID . DOT DELETE LPAREN STRING RPAREN NEWLINE
-    (16) decorator -> AT ID . DOT PATCH LPAREN STRING RPAREN NEWLINE
+    (9) class_definitions -> class_definition class_definitions .
 
-    DOT             shift and go to state 20
+    AT              reduce using rule 9 (class_definitions -> class_definition class_definitions .)
 
 
 state 16
 
-    (2) preamble -> optional_newlines import_stmt app_creation .
+    (11) class_definition -> CLASS ID . COLON NEWLINE class_properties
 
-    AT              reduce using rule 2 (preamble -> optional_newlines import_stmt app_creation .)
+    COLON           shift and go to state 24
 
 
 state 17
 
-    (6) app_creation -> ID . EQUALS ID DOT ID LPAREN RPAREN NEWLINE optional_newlines
+    (2) preamble -> optional_newlines import_stmt app_creation .
 
-    EQUALS          shift and go to state 21
+    CLASS           reduce using rule 2 (preamble -> optional_newlines import_stmt app_creation .)
+    AT              reduce using rule 2 (preamble -> optional_newlines import_stmt app_creation .)
 
 
 state 18
 
-    (5) import_stmt -> IMPORT ID . NEWLINE optional_newlines
+    (6) app_creation -> ID . EQUALS ID DOT ID LPAREN RPAREN NEWLINE optional_newlines
 
-    NEWLINE         shift and go to state 22
+    EQUALS          shift and go to state 25
 
 
 state 19
 
-    (17) function_def -> DEF ID . LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE
+    (5) import_stmt -> IMPORT ID . NEWLINE optional_newlines
 
-    LPAREN          shift and go to state 23
+    NEWLINE         shift and go to state 26
 
 
 state 20
 
-    (12) decorator -> AT ID DOT . GET LPAREN STRING RPAREN NEWLINE
-    (13) decorator -> AT ID DOT . POST LPAREN STRING RPAREN NEWLINE
-    (14) decorator -> AT ID DOT . PUT LPAREN STRING RPAREN NEWLINE
-    (15) decorator -> AT ID DOT . DELETE LPAREN STRING RPAREN NEWLINE
-    (16) decorator -> AT ID DOT . PATCH LPAREN STRING RPAREN NEWLINE
+    (15) endpoints -> endpoint endpoints .
 
-    GET             shift and go to state 24
-    POST            shift and go to state 25
-    PUT             shift and go to state 26
-    DELETE          shift and go to state 27
-    PATCH           shift and go to state 28
+    $end            reduce using rule 15 (endpoints -> endpoint endpoints .)
 
 
 state 21
 
-    (6) app_creation -> ID EQUALS . ID DOT ID LPAREN RPAREN NEWLINE optional_newlines
+    (17) endpoint -> decorator function_def .
 
-    ID              shift and go to state 29
+    AT              reduce using rule 17 (endpoint -> decorator function_def .)
+    $end            reduce using rule 17 (endpoint -> decorator function_def .)
 
 
 state 22
+
+    (23) function_def -> DEF . ID LPAREN params RPAREN COLON NEWLINE RETURN expression NEWLINE
+    (24) function_def -> DEF . ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE
+
+    ID              shift and go to state 27
+
+
+state 23
+
+    (18) decorator -> AT ID . DOT GET LPAREN STRING RPAREN NEWLINE
+    (19) decorator -> AT ID . DOT POST LPAREN STRING RPAREN NEWLINE
+    (20) decorator -> AT ID . DOT PUT LPAREN STRING RPAREN NEWLINE
+    (21) decorator -> AT ID . DOT DELETE LPAREN STRING RPAREN NEWLINE
+    (22) decorator -> AT ID . DOT PATCH LPAREN STRING RPAREN NEWLINE
+
+    DOT             shift and go to state 28
+
+
+state 24
+
+    (11) class_definition -> CLASS ID COLON . NEWLINE class_properties
+
+    NEWLINE         shift and go to state 29
+
+
+state 25
+
+    (6) app_creation -> ID EQUALS . ID DOT ID LPAREN RPAREN NEWLINE optional_newlines
+
+    ID              shift and go to state 30
+
+
+state 26
 
     (5) import_stmt -> IMPORT ID NEWLINE . optional_newlines
     (7) optional_newlines -> .
     (8) optional_newlines -> . NEWLINE optional_newlines
 
     ID              reduce using rule 7 (optional_newlines -> .)
+    CLASS           reduce using rule 7 (optional_newlines -> .)
     AT              reduce using rule 7 (optional_newlines -> .)
     NEWLINE         shift and go to state 4
 
-    optional_newlines              shift and go to state 30
+    optional_newlines              shift and go to state 31
 
-state 23
+state 27
 
-    (17) function_def -> DEF ID LPAREN . RPAREN COLON NEWLINE RETURN expression NEWLINE
-
-    RPAREN          shift and go to state 31
-
-
-state 24
-
-    (12) decorator -> AT ID DOT GET . LPAREN STRING RPAREN NEWLINE
+    (23) function_def -> DEF ID . LPAREN params RPAREN COLON NEWLINE RETURN expression NEWLINE
+    (24) function_def -> DEF ID . LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE
 
     LPAREN          shift and go to state 32
 
 
-state 25
-
-    (13) decorator -> AT ID DOT POST . LPAREN STRING RPAREN NEWLINE
-
-    LPAREN          shift and go to state 33
-
-
-state 26
-
-    (14) decorator -> AT ID DOT PUT . LPAREN STRING RPAREN NEWLINE
-
-    LPAREN          shift and go to state 34
-
-
-state 27
-
-    (15) decorator -> AT ID DOT DELETE . LPAREN STRING RPAREN NEWLINE
-
-    LPAREN          shift and go to state 35
-
-
 state 28
 
-    (16) decorator -> AT ID DOT PATCH . LPAREN STRING RPAREN NEWLINE
+    (18) decorator -> AT ID DOT . GET LPAREN STRING RPAREN NEWLINE
+    (19) decorator -> AT ID DOT . POST LPAREN STRING RPAREN NEWLINE
+    (20) decorator -> AT ID DOT . PUT LPAREN STRING RPAREN NEWLINE
+    (21) decorator -> AT ID DOT . DELETE LPAREN STRING RPAREN NEWLINE
+    (22) decorator -> AT ID DOT . PATCH LPAREN STRING RPAREN NEWLINE
 
-    LPAREN          shift and go to state 36
+    GET             shift and go to state 33
+    POST            shift and go to state 34
+    PUT             shift and go to state 35
+    DELETE          shift and go to state 36
+    PATCH           shift and go to state 37
 
 
 state 29
 
-    (6) app_creation -> ID EQUALS ID . DOT ID LPAREN RPAREN NEWLINE optional_newlines
+    (11) class_definition -> CLASS ID COLON NEWLINE . class_properties
+    (12) class_properties -> . class_property class_properties
+    (13) class_properties -> . class_property
+    (14) class_property -> . ID COLON type_hint NEWLINE
 
-    DOT             shift and go to state 37
+    ID              shift and go to state 38
 
+    class_properties               shift and go to state 39
+    class_property                 shift and go to state 40
 
 state 30
 
-    (5) import_stmt -> IMPORT ID NEWLINE optional_newlines .
+    (6) app_creation -> ID EQUALS ID . DOT ID LPAREN RPAREN NEWLINE optional_newlines
 
-    ID              reduce using rule 5 (import_stmt -> IMPORT ID NEWLINE optional_newlines .)
-    AT              reduce using rule 5 (import_stmt -> IMPORT ID NEWLINE optional_newlines .)
+    DOT             shift and go to state 41
 
 
 state 31
 
-    (17) function_def -> DEF ID LPAREN RPAREN . COLON NEWLINE RETURN expression NEWLINE
+    (5) import_stmt -> IMPORT ID NEWLINE optional_newlines .
 
-    COLON           shift and go to state 38
+    ID              reduce using rule 5 (import_stmt -> IMPORT ID NEWLINE optional_newlines .)
+    CLASS           reduce using rule 5 (import_stmt -> IMPORT ID NEWLINE optional_newlines .)
+    AT              reduce using rule 5 (import_stmt -> IMPORT ID NEWLINE optional_newlines .)
 
 
 state 32
 
-    (12) decorator -> AT ID DOT GET LPAREN . STRING RPAREN NEWLINE
+    (23) function_def -> DEF ID LPAREN . params RPAREN COLON NEWLINE RETURN expression NEWLINE
+    (24) function_def -> DEF ID LPAREN . RPAREN COLON NEWLINE RETURN expression NEWLINE
+    (25) params -> . param COMMA params
+    (26) params -> . param
+    (27) param -> . ID COLON type_hint
+    (28) param -> . ID
 
-    STRING          shift and go to state 39
+    RPAREN          shift and go to state 44
+    ID              shift and go to state 42
 
+    params                         shift and go to state 43
+    param                          shift and go to state 45
 
 state 33
 
-    (13) decorator -> AT ID DOT POST LPAREN . STRING RPAREN NEWLINE
+    (18) decorator -> AT ID DOT GET . LPAREN STRING RPAREN NEWLINE
 
-    STRING          shift and go to state 40
+    LPAREN          shift and go to state 46
 
 
 state 34
 
-    (14) decorator -> AT ID DOT PUT LPAREN . STRING RPAREN NEWLINE
+    (19) decorator -> AT ID DOT POST . LPAREN STRING RPAREN NEWLINE
 
-    STRING          shift and go to state 41
+    LPAREN          shift and go to state 47
 
 
 state 35
 
-    (15) decorator -> AT ID DOT DELETE LPAREN . STRING RPAREN NEWLINE
+    (20) decorator -> AT ID DOT PUT . LPAREN STRING RPAREN NEWLINE
 
-    STRING          shift and go to state 42
+    LPAREN          shift and go to state 48
 
 
 state 36
 
-    (16) decorator -> AT ID DOT PATCH LPAREN . STRING RPAREN NEWLINE
+    (21) decorator -> AT ID DOT DELETE . LPAREN STRING RPAREN NEWLINE
 
-    STRING          shift and go to state 43
+    LPAREN          shift and go to state 49
 
 
 state 37
 
-    (6) app_creation -> ID EQUALS ID DOT . ID LPAREN RPAREN NEWLINE optional_newlines
+    (22) decorator -> AT ID DOT PATCH . LPAREN STRING RPAREN NEWLINE
 
-    ID              shift and go to state 44
+    LPAREN          shift and go to state 50
 
 
 state 38
 
-    (17) function_def -> DEF ID LPAREN RPAREN COLON . NEWLINE RETURN expression NEWLINE
+    (14) class_property -> ID . COLON type_hint NEWLINE
 
-    NEWLINE         shift and go to state 45
+    COLON           shift and go to state 51
 
 
 state 39
 
-    (12) decorator -> AT ID DOT GET LPAREN STRING . RPAREN NEWLINE
+    (11) class_definition -> CLASS ID COLON NEWLINE class_properties .
 
-    RPAREN          shift and go to state 46
+    CLASS           reduce using rule 11 (class_definition -> CLASS ID COLON NEWLINE class_properties .)
+    AT              reduce using rule 11 (class_definition -> CLASS ID COLON NEWLINE class_properties .)
 
 
 state 40
 
-    (13) decorator -> AT ID DOT POST LPAREN STRING . RPAREN NEWLINE
+    (12) class_properties -> class_property . class_properties
+    (13) class_properties -> class_property .
+    (12) class_properties -> . class_property class_properties
+    (13) class_properties -> . class_property
+    (14) class_property -> . ID COLON type_hint NEWLINE
 
-    RPAREN          shift and go to state 47
+    CLASS           reduce using rule 13 (class_properties -> class_property .)
+    AT              reduce using rule 13 (class_properties -> class_property .)
+    ID              shift and go to state 38
 
+    class_property                 shift and go to state 40
+    class_properties               shift and go to state 52
 
 state 41
 
-    (14) decorator -> AT ID DOT PUT LPAREN STRING . RPAREN NEWLINE
+    (6) app_creation -> ID EQUALS ID DOT . ID LPAREN RPAREN NEWLINE optional_newlines
 
-    RPAREN          shift and go to state 48
+    ID              shift and go to state 53
 
 
 state 42
 
-    (15) decorator -> AT ID DOT DELETE LPAREN STRING . RPAREN NEWLINE
+    (27) param -> ID . COLON type_hint
+    (28) param -> ID .
 
-    RPAREN          shift and go to state 49
+    COLON           shift and go to state 54
+    COMMA           reduce using rule 28 (param -> ID .)
+    RPAREN          reduce using rule 28 (param -> ID .)
 
 
 state 43
 
-    (16) decorator -> AT ID DOT PATCH LPAREN STRING . RPAREN NEWLINE
+    (23) function_def -> DEF ID LPAREN params . RPAREN COLON NEWLINE RETURN expression NEWLINE
 
-    RPAREN          shift and go to state 50
+    RPAREN          shift and go to state 55
 
 
 state 44
 
-    (6) app_creation -> ID EQUALS ID DOT ID . LPAREN RPAREN NEWLINE optional_newlines
+    (24) function_def -> DEF ID LPAREN RPAREN . COLON NEWLINE RETURN expression NEWLINE
 
-    LPAREN          shift and go to state 51
+    COLON           shift and go to state 56
 
 
 state 45
 
-    (17) function_def -> DEF ID LPAREN RPAREN COLON NEWLINE . RETURN expression NEWLINE
+    (25) params -> param . COMMA params
+    (26) params -> param .
 
-    RETURN          shift and go to state 52
+    COMMA           shift and go to state 57
+    RPAREN          reduce using rule 26 (params -> param .)
 
 
 state 46
 
-    (12) decorator -> AT ID DOT GET LPAREN STRING RPAREN . NEWLINE
+    (18) decorator -> AT ID DOT GET LPAREN . STRING RPAREN NEWLINE
 
-    NEWLINE         shift and go to state 53
+    STRING          shift and go to state 58
 
 
 state 47
 
-    (13) decorator -> AT ID DOT POST LPAREN STRING RPAREN . NEWLINE
+    (19) decorator -> AT ID DOT POST LPAREN . STRING RPAREN NEWLINE
 
-    NEWLINE         shift and go to state 54
+    STRING          shift and go to state 59
 
 
 state 48
 
-    (14) decorator -> AT ID DOT PUT LPAREN STRING RPAREN . NEWLINE
+    (20) decorator -> AT ID DOT PUT LPAREN . STRING RPAREN NEWLINE
 
-    NEWLINE         shift and go to state 55
+    STRING          shift and go to state 60
 
 
 state 49
 
-    (15) decorator -> AT ID DOT DELETE LPAREN STRING RPAREN . NEWLINE
+    (21) decorator -> AT ID DOT DELETE LPAREN . STRING RPAREN NEWLINE
 
-    NEWLINE         shift and go to state 56
+    STRING          shift and go to state 61
 
 
 state 50
 
-    (16) decorator -> AT ID DOT PATCH LPAREN STRING RPAREN . NEWLINE
+    (22) decorator -> AT ID DOT PATCH LPAREN . STRING RPAREN NEWLINE
 
-    NEWLINE         shift and go to state 57
+    STRING          shift and go to state 62
 
 
 state 51
 
-    (6) app_creation -> ID EQUALS ID DOT ID LPAREN . RPAREN NEWLINE optional_newlines
+    (14) class_property -> ID COLON . type_hint NEWLINE
+    (29) type_hint -> . TYPE_INT
+    (30) type_hint -> . TYPE_STR
+    (31) type_hint -> . TYPE_FLOAT
+    (32) type_hint -> . TYPE_BOOL
+    (33) type_hint -> . ID
 
-    RPAREN          shift and go to state 58
+    TYPE_INT        shift and go to state 65
+    TYPE_STR        shift and go to state 66
+    TYPE_FLOAT      shift and go to state 67
+    TYPE_BOOL       shift and go to state 68
+    ID              shift and go to state 63
 
+    type_hint                      shift and go to state 64
 
 state 52
 
-    (17) function_def -> DEF ID LPAREN RPAREN COLON NEWLINE RETURN . expression NEWLINE
-    (18) expression -> . STRING
-    (19) expression -> . NUMBER
-    (20) expression -> . LBRACE dict_items RBRACE
+    (12) class_properties -> class_property class_properties .
 
-    STRING          shift and go to state 60
-    NUMBER          shift and go to state 61
-    LBRACE          shift and go to state 62
+    CLASS           reduce using rule 12 (class_properties -> class_property class_properties .)
+    AT              reduce using rule 12 (class_properties -> class_property class_properties .)
 
-    expression                     shift and go to state 59
 
 state 53
 
-    (12) decorator -> AT ID DOT GET LPAREN STRING RPAREN NEWLINE .
+    (6) app_creation -> ID EQUALS ID DOT ID . LPAREN RPAREN NEWLINE optional_newlines
 
-    DEF             reduce using rule 12 (decorator -> AT ID DOT GET LPAREN STRING RPAREN NEWLINE .)
+    LPAREN          shift and go to state 69
 
 
 state 54
 
-    (13) decorator -> AT ID DOT POST LPAREN STRING RPAREN NEWLINE .
+    (27) param -> ID COLON . type_hint
+    (29) type_hint -> . TYPE_INT
+    (30) type_hint -> . TYPE_STR
+    (31) type_hint -> . TYPE_FLOAT
+    (32) type_hint -> . TYPE_BOOL
+    (33) type_hint -> . ID
 
-    DEF             reduce using rule 13 (decorator -> AT ID DOT POST LPAREN STRING RPAREN NEWLINE .)
+    TYPE_INT        shift and go to state 65
+    TYPE_STR        shift and go to state 66
+    TYPE_FLOAT      shift and go to state 67
+    TYPE_BOOL       shift and go to state 68
+    ID              shift and go to state 63
 
+    type_hint                      shift and go to state 70
 
 state 55
 
-    (14) decorator -> AT ID DOT PUT LPAREN STRING RPAREN NEWLINE .
+    (23) function_def -> DEF ID LPAREN params RPAREN . COLON NEWLINE RETURN expression NEWLINE
 
-    DEF             reduce using rule 14 (decorator -> AT ID DOT PUT LPAREN STRING RPAREN NEWLINE .)
+    COLON           shift and go to state 71
 
 
 state 56
 
-    (15) decorator -> AT ID DOT DELETE LPAREN STRING RPAREN NEWLINE .
+    (24) function_def -> DEF ID LPAREN RPAREN COLON . NEWLINE RETURN expression NEWLINE
 
-    DEF             reduce using rule 15 (decorator -> AT ID DOT DELETE LPAREN STRING RPAREN NEWLINE .)
+    NEWLINE         shift and go to state 72
 
 
 state 57
 
-    (16) decorator -> AT ID DOT PATCH LPAREN STRING RPAREN NEWLINE .
+    (25) params -> param COMMA . params
+    (25) params -> . param COMMA params
+    (26) params -> . param
+    (27) param -> . ID COLON type_hint
+    (28) param -> . ID
 
-    DEF             reduce using rule 16 (decorator -> AT ID DOT PATCH LPAREN STRING RPAREN NEWLINE .)
+    ID              shift and go to state 42
 
+    param                          shift and go to state 45
+    params                         shift and go to state 73
 
 state 58
 
-    (6) app_creation -> ID EQUALS ID DOT ID LPAREN RPAREN . NEWLINE optional_newlines
+    (18) decorator -> AT ID DOT GET LPAREN STRING . RPAREN NEWLINE
 
-    NEWLINE         shift and go to state 63
+    RPAREN          shift and go to state 74
 
 
 state 59
 
-    (17) function_def -> DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression . NEWLINE
+    (19) decorator -> AT ID DOT POST LPAREN STRING . RPAREN NEWLINE
 
-    NEWLINE         shift and go to state 64
+    RPAREN          shift and go to state 75
 
 
 state 60
 
-    (18) expression -> STRING .
+    (20) decorator -> AT ID DOT PUT LPAREN STRING . RPAREN NEWLINE
 
-    NEWLINE         reduce using rule 18 (expression -> STRING .)
-    COMMA           reduce using rule 18 (expression -> STRING .)
-    RBRACE          reduce using rule 18 (expression -> STRING .)
+    RPAREN          shift and go to state 76
 
 
 state 61
 
-    (19) expression -> NUMBER .
+    (21) decorator -> AT ID DOT DELETE LPAREN STRING . RPAREN NEWLINE
 
-    NEWLINE         reduce using rule 19 (expression -> NUMBER .)
-    COMMA           reduce using rule 19 (expression -> NUMBER .)
-    RBRACE          reduce using rule 19 (expression -> NUMBER .)
+    RPAREN          shift and go to state 77
 
 
 state 62
 
-    (20) expression -> LBRACE . dict_items RBRACE
-    (21) dict_items -> . dict_item COMMA dict_items
-    (22) dict_items -> . dict_item
-    (23) dict_item -> . STRING COLON expression
+    (22) decorator -> AT ID DOT PATCH LPAREN STRING . RPAREN NEWLINE
 
-    STRING          shift and go to state 67
+    RPAREN          shift and go to state 78
 
-    dict_items                     shift and go to state 65
-    dict_item                      shift and go to state 66
 
 state 63
+
+    (33) type_hint -> ID .
+
+    NEWLINE         reduce using rule 33 (type_hint -> ID .)
+    COMMA           reduce using rule 33 (type_hint -> ID .)
+    RPAREN          reduce using rule 33 (type_hint -> ID .)
+
+
+state 64
+
+    (14) class_property -> ID COLON type_hint . NEWLINE
+
+    NEWLINE         shift and go to state 79
+
+
+state 65
+
+    (29) type_hint -> TYPE_INT .
+
+    NEWLINE         reduce using rule 29 (type_hint -> TYPE_INT .)
+    COMMA           reduce using rule 29 (type_hint -> TYPE_INT .)
+    RPAREN          reduce using rule 29 (type_hint -> TYPE_INT .)
+
+
+state 66
+
+    (30) type_hint -> TYPE_STR .
+
+    NEWLINE         reduce using rule 30 (type_hint -> TYPE_STR .)
+    COMMA           reduce using rule 30 (type_hint -> TYPE_STR .)
+    RPAREN          reduce using rule 30 (type_hint -> TYPE_STR .)
+
+
+state 67
+
+    (31) type_hint -> TYPE_FLOAT .
+
+    NEWLINE         reduce using rule 31 (type_hint -> TYPE_FLOAT .)
+    COMMA           reduce using rule 31 (type_hint -> TYPE_FLOAT .)
+    RPAREN          reduce using rule 31 (type_hint -> TYPE_FLOAT .)
+
+
+state 68
+
+    (32) type_hint -> TYPE_BOOL .
+
+    NEWLINE         reduce using rule 32 (type_hint -> TYPE_BOOL .)
+    COMMA           reduce using rule 32 (type_hint -> TYPE_BOOL .)
+    RPAREN          reduce using rule 32 (type_hint -> TYPE_BOOL .)
+
+
+state 69
+
+    (6) app_creation -> ID EQUALS ID DOT ID LPAREN . RPAREN NEWLINE optional_newlines
+
+    RPAREN          shift and go to state 80
+
+
+state 70
+
+    (27) param -> ID COLON type_hint .
+
+    COMMA           reduce using rule 27 (param -> ID COLON type_hint .)
+    RPAREN          reduce using rule 27 (param -> ID COLON type_hint .)
+
+
+state 71
+
+    (23) function_def -> DEF ID LPAREN params RPAREN COLON . NEWLINE RETURN expression NEWLINE
+
+    NEWLINE         shift and go to state 81
+
+
+state 72
+
+    (24) function_def -> DEF ID LPAREN RPAREN COLON NEWLINE . RETURN expression NEWLINE
+
+    RETURN          shift and go to state 82
+
+
+state 73
+
+    (25) params -> param COMMA params .
+
+    RPAREN          reduce using rule 25 (params -> param COMMA params .)
+
+
+state 74
+
+    (18) decorator -> AT ID DOT GET LPAREN STRING RPAREN . NEWLINE
+
+    NEWLINE         shift and go to state 83
+
+
+state 75
+
+    (19) decorator -> AT ID DOT POST LPAREN STRING RPAREN . NEWLINE
+
+    NEWLINE         shift and go to state 84
+
+
+state 76
+
+    (20) decorator -> AT ID DOT PUT LPAREN STRING RPAREN . NEWLINE
+
+    NEWLINE         shift and go to state 85
+
+
+state 77
+
+    (21) decorator -> AT ID DOT DELETE LPAREN STRING RPAREN . NEWLINE
+
+    NEWLINE         shift and go to state 86
+
+
+state 78
+
+    (22) decorator -> AT ID DOT PATCH LPAREN STRING RPAREN . NEWLINE
+
+    NEWLINE         shift and go to state 87
+
+
+state 79
+
+    (14) class_property -> ID COLON type_hint NEWLINE .
+
+    ID              reduce using rule 14 (class_property -> ID COLON type_hint NEWLINE .)
+    CLASS           reduce using rule 14 (class_property -> ID COLON type_hint NEWLINE .)
+    AT              reduce using rule 14 (class_property -> ID COLON type_hint NEWLINE .)
+
+
+state 80
+
+    (6) app_creation -> ID EQUALS ID DOT ID LPAREN RPAREN . NEWLINE optional_newlines
+
+    NEWLINE         shift and go to state 88
+
+
+state 81
+
+    (23) function_def -> DEF ID LPAREN params RPAREN COLON NEWLINE . RETURN expression NEWLINE
+
+    RETURN          shift and go to state 89
+
+
+state 82
+
+    (24) function_def -> DEF ID LPAREN RPAREN COLON NEWLINE RETURN . expression NEWLINE
+    (34) expression -> . STRING
+    (35) expression -> . NUMBER
+    (36) expression -> . LBRACE dict_items RBRACE
+    (37) expression -> . LBRACE RBRACE
+    (38) expression -> . LBRACKET list_items RBRACKET
+    (39) expression -> . LBRACKET RBRACKET
+    (42) expression -> . ID
+    (43) expression -> . ID DOT ID
+    (44) expression -> . TRUE
+    (45) expression -> . FALSE
+    (46) expression -> . NONE
+
+    STRING          shift and go to state 92
+    NUMBER          shift and go to state 93
+    LBRACE          shift and go to state 94
+    LBRACKET        shift and go to state 95
+    ID              shift and go to state 90
+    TRUE            shift and go to state 96
+    FALSE           shift and go to state 97
+    NONE            shift and go to state 98
+
+    expression                     shift and go to state 91
+
+state 83
+
+    (18) decorator -> AT ID DOT GET LPAREN STRING RPAREN NEWLINE .
+
+    DEF             reduce using rule 18 (decorator -> AT ID DOT GET LPAREN STRING RPAREN NEWLINE .)
+
+
+state 84
+
+    (19) decorator -> AT ID DOT POST LPAREN STRING RPAREN NEWLINE .
+
+    DEF             reduce using rule 19 (decorator -> AT ID DOT POST LPAREN STRING RPAREN NEWLINE .)
+
+
+state 85
+
+    (20) decorator -> AT ID DOT PUT LPAREN STRING RPAREN NEWLINE .
+
+    DEF             reduce using rule 20 (decorator -> AT ID DOT PUT LPAREN STRING RPAREN NEWLINE .)
+
+
+state 86
+
+    (21) decorator -> AT ID DOT DELETE LPAREN STRING RPAREN NEWLINE .
+
+    DEF             reduce using rule 21 (decorator -> AT ID DOT DELETE LPAREN STRING RPAREN NEWLINE .)
+
+
+state 87
+
+    (22) decorator -> AT ID DOT PATCH LPAREN STRING RPAREN NEWLINE .
+
+    DEF             reduce using rule 22 (decorator -> AT ID DOT PATCH LPAREN STRING RPAREN NEWLINE .)
+
+
+state 88
 
     (6) app_creation -> ID EQUALS ID DOT ID LPAREN RPAREN NEWLINE . optional_newlines
     (7) optional_newlines -> .
     (8) optional_newlines -> . NEWLINE optional_newlines
 
+    CLASS           reduce using rule 7 (optional_newlines -> .)
     AT              reduce using rule 7 (optional_newlines -> .)
     NEWLINE         shift and go to state 4
 
-    optional_newlines              shift and go to state 68
+    optional_newlines              shift and go to state 99
 
-state 64
+state 89
 
-    (17) function_def -> DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE .
+    (23) function_def -> DEF ID LPAREN params RPAREN COLON NEWLINE RETURN . expression NEWLINE
+    (34) expression -> . STRING
+    (35) expression -> . NUMBER
+    (36) expression -> . LBRACE dict_items RBRACE
+    (37) expression -> . LBRACE RBRACE
+    (38) expression -> . LBRACKET list_items RBRACKET
+    (39) expression -> . LBRACKET RBRACKET
+    (42) expression -> . ID
+    (43) expression -> . ID DOT ID
+    (44) expression -> . TRUE
+    (45) expression -> . FALSE
+    (46) expression -> . NONE
 
-    AT              reduce using rule 17 (function_def -> DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE .)
-    $end            reduce using rule 17 (function_def -> DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE .)
+    STRING          shift and go to state 92
+    NUMBER          shift and go to state 93
+    LBRACE          shift and go to state 94
+    LBRACKET        shift and go to state 95
+    ID              shift and go to state 90
+    TRUE            shift and go to state 96
+    FALSE           shift and go to state 97
+    NONE            shift and go to state 98
+
+    expression                     shift and go to state 100
+
+state 90
+
+    (42) expression -> ID .
+    (43) expression -> ID . DOT ID
+
+    NEWLINE         reduce using rule 42 (expression -> ID .)
+    COMMA           reduce using rule 42 (expression -> ID .)
+    RBRACKET        reduce using rule 42 (expression -> ID .)
+    RBRACE          reduce using rule 42 (expression -> ID .)
+    DOT             shift and go to state 101
 
 
-state 65
+state 91
 
-    (20) expression -> LBRACE dict_items . RBRACE
+    (24) function_def -> DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression . NEWLINE
 
-    RBRACE          shift and go to state 69
-
-
-state 66
-
-    (21) dict_items -> dict_item . COMMA dict_items
-    (22) dict_items -> dict_item .
-
-    COMMA           shift and go to state 70
-    RBRACE          reduce using rule 22 (dict_items -> dict_item .)
+    NEWLINE         shift and go to state 102
 
 
-state 67
+state 92
 
-    (23) dict_item -> STRING . COLON expression
+    (34) expression -> STRING .
 
-    COLON           shift and go to state 71
+    NEWLINE         reduce using rule 34 (expression -> STRING .)
+    COMMA           reduce using rule 34 (expression -> STRING .)
+    RBRACKET        reduce using rule 34 (expression -> STRING .)
+    RBRACE          reduce using rule 34 (expression -> STRING .)
 
 
-state 68
+state 93
+
+    (35) expression -> NUMBER .
+
+    NEWLINE         reduce using rule 35 (expression -> NUMBER .)
+    COMMA           reduce using rule 35 (expression -> NUMBER .)
+    RBRACKET        reduce using rule 35 (expression -> NUMBER .)
+    RBRACE          reduce using rule 35 (expression -> NUMBER .)
+
+
+state 94
+
+    (36) expression -> LBRACE . dict_items RBRACE
+    (37) expression -> LBRACE . RBRACE
+    (47) dict_items -> . dict_item COMMA dict_items
+    (48) dict_items -> . dict_item
+    (49) dict_item -> . STRING COLON expression
+
+    RBRACE          shift and go to state 104
+    STRING          shift and go to state 106
+
+    dict_items                     shift and go to state 103
+    dict_item                      shift and go to state 105
+
+state 95
+
+    (38) expression -> LBRACKET . list_items RBRACKET
+    (39) expression -> LBRACKET . RBRACKET
+    (40) list_items -> . expression COMMA list_items
+    (41) list_items -> . expression
+    (34) expression -> . STRING
+    (35) expression -> . NUMBER
+    (36) expression -> . LBRACE dict_items RBRACE
+    (37) expression -> . LBRACE RBRACE
+    (38) expression -> . LBRACKET list_items RBRACKET
+    (39) expression -> . LBRACKET RBRACKET
+    (42) expression -> . ID
+    (43) expression -> . ID DOT ID
+    (44) expression -> . TRUE
+    (45) expression -> . FALSE
+    (46) expression -> . NONE
+
+    RBRACKET        shift and go to state 108
+    STRING          shift and go to state 92
+    NUMBER          shift and go to state 93
+    LBRACE          shift and go to state 94
+    LBRACKET        shift and go to state 95
+    ID              shift and go to state 90
+    TRUE            shift and go to state 96
+    FALSE           shift and go to state 97
+    NONE            shift and go to state 98
+
+    list_items                     shift and go to state 107
+    expression                     shift and go to state 109
+
+state 96
+
+    (44) expression -> TRUE .
+
+    NEWLINE         reduce using rule 44 (expression -> TRUE .)
+    COMMA           reduce using rule 44 (expression -> TRUE .)
+    RBRACKET        reduce using rule 44 (expression -> TRUE .)
+    RBRACE          reduce using rule 44 (expression -> TRUE .)
+
+
+state 97
+
+    (45) expression -> FALSE .
+
+    NEWLINE         reduce using rule 45 (expression -> FALSE .)
+    COMMA           reduce using rule 45 (expression -> FALSE .)
+    RBRACKET        reduce using rule 45 (expression -> FALSE .)
+    RBRACE          reduce using rule 45 (expression -> FALSE .)
+
+
+state 98
+
+    (46) expression -> NONE .
+
+    NEWLINE         reduce using rule 46 (expression -> NONE .)
+    COMMA           reduce using rule 46 (expression -> NONE .)
+    RBRACKET        reduce using rule 46 (expression -> NONE .)
+    RBRACE          reduce using rule 46 (expression -> NONE .)
+
+
+state 99
 
     (6) app_creation -> ID EQUALS ID DOT ID LPAREN RPAREN NEWLINE optional_newlines .
 
+    CLASS           reduce using rule 6 (app_creation -> ID EQUALS ID DOT ID LPAREN RPAREN NEWLINE optional_newlines .)
     AT              reduce using rule 6 (app_creation -> ID EQUALS ID DOT ID LPAREN RPAREN NEWLINE optional_newlines .)
 
 
-state 69
+state 100
 
-    (20) expression -> LBRACE dict_items RBRACE .
+    (23) function_def -> DEF ID LPAREN params RPAREN COLON NEWLINE RETURN expression . NEWLINE
 
-    NEWLINE         reduce using rule 20 (expression -> LBRACE dict_items RBRACE .)
-    COMMA           reduce using rule 20 (expression -> LBRACE dict_items RBRACE .)
-    RBRACE          reduce using rule 20 (expression -> LBRACE dict_items RBRACE .)
+    NEWLINE         shift and go to state 110
 
 
-state 70
+state 101
 
-    (21) dict_items -> dict_item COMMA . dict_items
-    (21) dict_items -> . dict_item COMMA dict_items
-    (22) dict_items -> . dict_item
-    (23) dict_item -> . STRING COLON expression
+    (43) expression -> ID DOT . ID
 
-    STRING          shift and go to state 67
-
-    dict_item                      shift and go to state 66
-    dict_items                     shift and go to state 72
-
-state 71
-
-    (23) dict_item -> STRING COLON . expression
-    (18) expression -> . STRING
-    (19) expression -> . NUMBER
-    (20) expression -> . LBRACE dict_items RBRACE
-
-    STRING          shift and go to state 60
-    NUMBER          shift and go to state 61
-    LBRACE          shift and go to state 62
-
-    expression                     shift and go to state 73
-
-state 72
-
-    (21) dict_items -> dict_item COMMA dict_items .
-
-    RBRACE          reduce using rule 21 (dict_items -> dict_item COMMA dict_items .)
+    ID              shift and go to state 111
 
 
-state 73
+state 102
 
-    (23) dict_item -> STRING COLON expression .
+    (24) function_def -> DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE .
 
-    COMMA           reduce using rule 23 (dict_item -> STRING COLON expression .)
-    RBRACE          reduce using rule 23 (dict_item -> STRING COLON expression .)
+    AT              reduce using rule 24 (function_def -> DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE .)
+    $end            reduce using rule 24 (function_def -> DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE .)
+
+
+state 103
+
+    (36) expression -> LBRACE dict_items . RBRACE
+
+    RBRACE          shift and go to state 112
+
+
+state 104
+
+    (37) expression -> LBRACE RBRACE .
+
+    NEWLINE         reduce using rule 37 (expression -> LBRACE RBRACE .)
+    COMMA           reduce using rule 37 (expression -> LBRACE RBRACE .)
+    RBRACKET        reduce using rule 37 (expression -> LBRACE RBRACE .)
+    RBRACE          reduce using rule 37 (expression -> LBRACE RBRACE .)
+
+
+state 105
+
+    (47) dict_items -> dict_item . COMMA dict_items
+    (48) dict_items -> dict_item .
+
+    COMMA           shift and go to state 113
+    RBRACE          reduce using rule 48 (dict_items -> dict_item .)
+
+
+state 106
+
+    (49) dict_item -> STRING . COLON expression
+
+    COLON           shift and go to state 114
+
+
+state 107
+
+    (38) expression -> LBRACKET list_items . RBRACKET
+
+    RBRACKET        shift and go to state 115
+
+
+state 108
+
+    (39) expression -> LBRACKET RBRACKET .
+
+    NEWLINE         reduce using rule 39 (expression -> LBRACKET RBRACKET .)
+    COMMA           reduce using rule 39 (expression -> LBRACKET RBRACKET .)
+    RBRACKET        reduce using rule 39 (expression -> LBRACKET RBRACKET .)
+    RBRACE          reduce using rule 39 (expression -> LBRACKET RBRACKET .)
+
+
+state 109
+
+    (40) list_items -> expression . COMMA list_items
+    (41) list_items -> expression .
+
+    COMMA           shift and go to state 116
+    RBRACKET        reduce using rule 41 (list_items -> expression .)
+
+
+state 110
+
+    (23) function_def -> DEF ID LPAREN params RPAREN COLON NEWLINE RETURN expression NEWLINE .
+
+    AT              reduce using rule 23 (function_def -> DEF ID LPAREN params RPAREN COLON NEWLINE RETURN expression NEWLINE .)
+    $end            reduce using rule 23 (function_def -> DEF ID LPAREN params RPAREN COLON NEWLINE RETURN expression NEWLINE .)
+
+
+state 111
+
+    (43) expression -> ID DOT ID .
+
+    NEWLINE         reduce using rule 43 (expression -> ID DOT ID .)
+    COMMA           reduce using rule 43 (expression -> ID DOT ID .)
+    RBRACKET        reduce using rule 43 (expression -> ID DOT ID .)
+    RBRACE          reduce using rule 43 (expression -> ID DOT ID .)
+
+
+state 112
+
+    (36) expression -> LBRACE dict_items RBRACE .
+
+    NEWLINE         reduce using rule 36 (expression -> LBRACE dict_items RBRACE .)
+    COMMA           reduce using rule 36 (expression -> LBRACE dict_items RBRACE .)
+    RBRACKET        reduce using rule 36 (expression -> LBRACE dict_items RBRACE .)
+    RBRACE          reduce using rule 36 (expression -> LBRACE dict_items RBRACE .)
+
+
+state 113
+
+    (47) dict_items -> dict_item COMMA . dict_items
+    (47) dict_items -> . dict_item COMMA dict_items
+    (48) dict_items -> . dict_item
+    (49) dict_item -> . STRING COLON expression
+
+    STRING          shift and go to state 106
+
+    dict_item                      shift and go to state 105
+    dict_items                     shift and go to state 117
+
+state 114
+
+    (49) dict_item -> STRING COLON . expression
+    (34) expression -> . STRING
+    (35) expression -> . NUMBER
+    (36) expression -> . LBRACE dict_items RBRACE
+    (37) expression -> . LBRACE RBRACE
+    (38) expression -> . LBRACKET list_items RBRACKET
+    (39) expression -> . LBRACKET RBRACKET
+    (42) expression -> . ID
+    (43) expression -> . ID DOT ID
+    (44) expression -> . TRUE
+    (45) expression -> . FALSE
+    (46) expression -> . NONE
+
+    STRING          shift and go to state 92
+    NUMBER          shift and go to state 93
+    LBRACE          shift and go to state 94
+    LBRACKET        shift and go to state 95
+    ID              shift and go to state 90
+    TRUE            shift and go to state 96
+    FALSE           shift and go to state 97
+    NONE            shift and go to state 98
+
+    expression                     shift and go to state 118
+
+state 115
+
+    (38) expression -> LBRACKET list_items RBRACKET .
+
+    NEWLINE         reduce using rule 38 (expression -> LBRACKET list_items RBRACKET .)
+    COMMA           reduce using rule 38 (expression -> LBRACKET list_items RBRACKET .)
+    RBRACKET        reduce using rule 38 (expression -> LBRACKET list_items RBRACKET .)
+    RBRACE          reduce using rule 38 (expression -> LBRACKET list_items RBRACKET .)
+
+
+state 116
+
+    (40) list_items -> expression COMMA . list_items
+    (40) list_items -> . expression COMMA list_items
+    (41) list_items -> . expression
+    (34) expression -> . STRING
+    (35) expression -> . NUMBER
+    (36) expression -> . LBRACE dict_items RBRACE
+    (37) expression -> . LBRACE RBRACE
+    (38) expression -> . LBRACKET list_items RBRACKET
+    (39) expression -> . LBRACKET RBRACKET
+    (42) expression -> . ID
+    (43) expression -> . ID DOT ID
+    (44) expression -> . TRUE
+    (45) expression -> . FALSE
+    (46) expression -> . NONE
+
+    STRING          shift and go to state 92
+    NUMBER          shift and go to state 93
+    LBRACE          shift and go to state 94
+    LBRACKET        shift and go to state 95
+    ID              shift and go to state 90
+    TRUE            shift and go to state 96
+    FALSE           shift and go to state 97
+    NONE            shift and go to state 98
+
+    expression                     shift and go to state 109
+    list_items                     shift and go to state 119
+
+state 117
+
+    (47) dict_items -> dict_item COMMA dict_items .
+
+    RBRACE          reduce using rule 47 (dict_items -> dict_item COMMA dict_items .)
+
+
+state 118
+
+    (49) dict_item -> STRING COLON expression .
+
+    COMMA           reduce using rule 49 (dict_item -> STRING COLON expression .)
+    RBRACE          reduce using rule 49 (dict_item -> STRING COLON expression .)
+
+
+state 119
+
+    (40) list_items -> expression COMMA list_items .
+
+    RBRACKET        reduce using rule 40 (list_items -> expression COMMA list_items .)
 

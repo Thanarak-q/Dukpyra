@@ -17,12 +17,12 @@ from watchdog.observers import Observer
 
 # Import จาก modules อื่นใน package
 try:
-    from .lexer import lexer
-    from .parser import parser
+    from .parser import parse
+    from .codegen import generate_csharp
 except ImportError:
     # ถ้ารันโดยตรงไม่ผ่าน package
-    import ply.lex as lex
-    import ply.yacc as yacc
+    parse = None
+    generate_csharp = None
 
 
 class DukpyraCompiler:
@@ -54,17 +54,28 @@ class DukpyraCompiler:
     def compile_file(self, python_file: Path) -> str:
         """
         แปลงไฟล์ Python หนึ่งไฟล์เป็น C#
-        ใช้ Lexer + Parser ที่เราสร้างไว้
+        
+        Pipeline: Source → Parser → AST → CodeGen → C#
         """
         with open(python_file, "r", encoding="utf-8") as f:
             python_code = f.read()
 
         try:
-            # ใช้ lexer และ parser จาก modules
-            result = parser.parse(python_code.strip() + "\n", lexer=lexer)
-            return result if result else ""
+            # Step 1: Parse source code into AST
+            ast = parse(python_code)
+            
+            if ast is None:
+                click.echo(f"❌ Failed to parse {python_file.name}", err=True)
+                return ""
+            
+            # Step 2: Generate C# code from AST
+            csharp_code = generate_csharp(ast)
+            
+            return csharp_code if csharp_code else ""
         except Exception as e:
             click.echo(f"❌ Error compiling {python_file.name}: {e}", err=True)
+            import traceback
+            traceback.print_exc()
             return ""
 
     def compile_project(self) -> bool:
@@ -118,15 +129,21 @@ class DukpyraCompiler:
     def _merge_compiled_code(self, routes: list) -> str:
         """รวมโค้ด C# จากหลายๆ ไฟล์เป็นไฟล์เดียว"""
         
+        all_record_blocks = []
         all_route_blocks = []
+        
         for route_output in routes:
-            # ตัด header และ footer ออก เอาเฉพาะ routes
-            # Parser จะสร้าง output ที่มี "// --- Dukpyra Generated Routes ---" และ "// --------------------------------"
             lines = route_output.split('\n')
             in_routes = False
+            record_lines = []
             route_lines = []
             
             for line in lines:
+                # Collect record definitions (public record ...) before routes
+                if line.strip().startswith("public record"):
+                    record_lines.append(line)
+                    continue
+                    
                 if "// --- Dukpyra Generated Routes ---" in line:
                     in_routes = True
                     continue
@@ -136,23 +153,37 @@ class DukpyraCompiler:
                 if in_routes:
                     route_lines.append(line)
             
+            if record_lines:
+                all_record_blocks.extend(record_lines)
             if route_lines:
                 all_route_blocks.append('\n'.join(route_lines).strip())
         
         # สร้าง Program.cs ใหม่
-        header = """var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
-
-// ===== Dukpyra Generated Routes =====
-
-"""
-        footer = """
-
-// ====================================
-
-app.Run();
-"""
-        return header + "\n\n".join(all_route_blocks) + footer
+        parts = []
+        
+        # Add ASP.NET Core boilerplate first (top-level statements)
+        parts.append("var builder = WebApplication.CreateBuilder(args);")
+        parts.append("var app = builder.Build();")
+        parts.append("")
+        parts.append("// ===== Dukpyra Generated Routes =====")
+        parts.append("")
+        
+        # Add routes
+        parts.append("\n\n".join(all_route_blocks))
+        
+        # Add footer
+        parts.append("")
+        parts.append("// ====================================")
+        parts.append("")
+        parts.append("app.Run();")
+        
+        # Add record definitions at the END (C# requires top-level statements first)
+        if all_record_blocks:
+            parts.append("")
+            parts.append("// ===== Request/Response Models =====")
+            parts.append('\n'.join(all_record_blocks))
+        
+        return '\n'.join(parts)
 
     def _create_csproj(self):
         """สร้างไฟล์ .csproj สำหรับ dotnet"""

@@ -9,15 +9,25 @@ import ply.lex as lex
 # 1.1 คำสงวน (Reserved Words)
 # คือคำที่มีความหมายเฉพาะในภาษา Python หรือ Framework ห้ามนำไปตั้งชื่อตัวแปร
 reserved = {
-    "import": "IMPORT",  # คำสั่ง import
-    "def": "DEF",  # ใช้สำหรับประกาศฟังก์ชัน
-    "return": "RETURN",  # คำสั่งส่งค่ากลับจากฟังก์ชัน
-    "get": "GET",  # คำสั่ง HTTP Method GET
-    "post": "POST",  # คำสั่ง HTTP Method POST
-    "put": "PUT",  # คำสั่ง HTTP Method PUT
-    "delete": "DELETE",  # คำสั่ง HTTP Method DELETE
-    "patch": "PATCH",  # คำสั่ง HTTP Method PATCH
-    # ประเภทตัวแปร (Data Types) - สำหรับอนาคต
+    # Python keywords
+    "import": "IMPORT",
+    "def": "DEF",
+    "class": "CLASS",  # For request body definitions
+    "return": "RETURN",
+    
+    # Boolean and None literals
+    "True": "TRUE",
+    "False": "FALSE",
+    "None": "NONE",
+    
+    # HTTP Methods
+    "get": "GET",
+    "post": "POST",
+    "put": "PUT",
+    "delete": "DELETE",
+    "patch": "PATCH",
+    
+    # Type hints
     "int": "TYPE_INT",
     "str": "TYPE_STR",
     "float": "TYPE_FLOAT",
@@ -25,28 +35,31 @@ reserved = {
 }
 
 # 1.2 รายชื่อ Token ทั้งหมด (Token List)
-# เป็นบัญชีรายชื่อที่ Lexer ต้องรู้จัก ทั้งแบบสัญลักษณ์และคำสงวน
 tokens = [
-    "ID",  # Identifier: ชื่อตัวแปร หรือชื่อฟังก์ชันที่ผู้ใช้ตั้งเอง
-    "NUMBER",  # Number: ตัวเลข
-    "STRING",  # String: ข้อความตัวอักษรที่อยู่ในเครื่องหมายคำพูด ""
-    "LPAREN",  # Left Parenthesis: วงเล็บเปิด (
-    "RPAREN",  # Right Parenthesis: วงเล็บปิด )
-    "LBRACE",  # Left Brace: ปีกกาเปิด { (ใช้กับ Dictionary / JSON)
-    "RBRACE",  # Right Brace: ปีกกาปิด }
-    "COLON",  # Colon: เครื่องหมายโคลอน :
-    "COMMA",  # Comma: เครื่องหมายจุลภาค ,
-    "AT",  # At sign: เครื่องหมาย @ (ใช้สำหรับ Decorator)
-    "DOT",  # Dot: จุด .
-    "EQUALS",  # Equals: เครื่องหมายเท่ากับ = (สำหรับ assignment)
-    "NEWLINE",  # Newline: การขึ้นบรรทัดใหม่ (สำคัญมากใน Python)
-] + list(reserved.values())  # นำรายชื่อคำสงวนมารวมเข้าไปใน List นี้ด้วย
+    "ID",       # Identifier: ชื่อตัวแปร หรือชื่อฟังก์ชันที่ผู้ใช้ตั้งเอง
+    "NUMBER",   # Number: ตัวเลข (int หรือ float)
+    "STRING",   # String: ข้อความตัวอักษร "" หรือ ''
+    "LPAREN",   # (
+    "RPAREN",   # )
+    "LBRACE",   # {
+    "RBRACE",   # }
+    "LBRACKET", # [
+    "RBRACKET", # ]
+    "COLON",    # :
+    "COMMA",    # ,
+    "AT",       # @
+    "DOT",      # .
+    "EQUALS",   # =
+    "NEWLINE",  # \n
+] + list(reserved.values())
 
 # 1.3 กฎการตัดคำแบบง่าย (Simple Regex Rules)
 t_LPAREN = r"\("
 t_RPAREN = r"\)"
 t_LBRACE = r"\{"
 t_RBRACE = r"\}"
+t_LBRACKET = r"\["
+t_RBRACKET = r"\]"
 t_COLON = r":"
 t_COMMA = r","
 t_AT = r"@"
@@ -69,15 +82,20 @@ def t_ID(t):
     return t
 
 
-# กฎสำหรับตัวเลข (Number)
+# กฎสำหรับตัวเลข (Number) - รองรับทั้ง int และ float
 def t_NUMBER(t):
-    r"\d+"
-    t.value = int(t.value)
+    r"\d+\.?\d*"
+    if '.' in t.value:
+        t.value = float(t.value)
+    else:
+        t.value = int(t.value)
     return t
 
 
+# กฎสำหรับ String - รองรับทั้ง double quotes และ single quotes
 def t_STRING(t):
-    r"\"([^\\\n]|(\\.))*?\""
+    r'''("[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*')'''
+    # ตัดเครื่องหมายคำพูด (ตัวแรกและตัวสุดท้าย) ออก
     t.value = t.value[1:-1]
     return t
 
@@ -89,7 +107,7 @@ def t_NEWLINE(t):
 
 
 def t_error(t):
-    print(f"Lexer Error: เจอตัวอักษรที่ไม่รู้จัก '{t.value[0]}' ที่บรรทัด {t.lexer.lineno}")
+    print(f"Lexer Error: Unknown character '{t.value[0]}' at line {t.lexer.lineno}")
     t.lexer.skip(1)
 
 

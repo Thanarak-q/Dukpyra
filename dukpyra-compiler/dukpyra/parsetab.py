@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = 'AT COLON COMMA DEF DELETE DOT EQUALS GET ID IMPORT LBRACE LPAREN NEWLINE NUMBER PATCH POST PUT RBRACE RETURN RPAREN STRING TYPE_BOOL TYPE_FLOAT TYPE_INT TYPE_STRprogram : preamble endpointspreamble : optional_newlines import_stmt app_creationpreamble : optional_newlines import_stmtpreamble : optional_newlinesimport_stmt : IMPORT ID NEWLINE optional_newlinesapp_creation : ID EQUALS ID DOT ID LPAREN RPAREN NEWLINE optional_newlinesoptional_newlines : optional_newlines : NEWLINE optional_newlinesendpoints : endpoint endpointsendpoints : endpointendpoint : decorator function_defdecorator : AT ID DOT GET LPAREN STRING RPAREN NEWLINEdecorator : AT ID DOT POST LPAREN STRING RPAREN NEWLINEdecorator : AT ID DOT PUT LPAREN STRING RPAREN NEWLINEdecorator : AT ID DOT DELETE LPAREN STRING RPAREN NEWLINEdecorator : AT ID DOT PATCH LPAREN STRING RPAREN NEWLINEfunction_def : DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINEexpression : STRINGexpression : NUMBERexpression : LBRACE dict_items RBRACEdict_items : dict_item COMMA dict_itemsdict_items : dict_itemdict_item : STRING COLON expression'
+_lr_signature = 'AT CLASS COLON COMMA DEF DELETE DOT EQUALS FALSE GET ID IMPORT LBRACE LBRACKET LPAREN NEWLINE NONE NUMBER PATCH POST PUT RBRACE RBRACKET RETURN RPAREN STRING TRUE TYPE_BOOL TYPE_FLOAT TYPE_INT TYPE_STRprogram : preamble class_definitions endpointspreamble : optional_newlines import_stmt app_creationpreamble : optional_newlines import_stmtpreamble : optional_newlinesimport_stmt : IMPORT ID NEWLINE optional_newlinesapp_creation : ID EQUALS ID DOT ID LPAREN RPAREN NEWLINE optional_newlinesoptional_newlines : optional_newlines : NEWLINE optional_newlinesclass_definitions : class_definition class_definitionsclass_definitions : class_definition : CLASS ID COLON NEWLINE class_propertiesclass_properties : class_property class_propertiesclass_properties : class_propertyclass_property : ID COLON type_hint NEWLINEendpoints : endpoint endpointsendpoints : endpointendpoint : decorator function_defdecorator : AT ID DOT GET LPAREN STRING RPAREN NEWLINEdecorator : AT ID DOT POST LPAREN STRING RPAREN NEWLINEdecorator : AT ID DOT PUT LPAREN STRING RPAREN NEWLINEdecorator : AT ID DOT DELETE LPAREN STRING RPAREN NEWLINEdecorator : AT ID DOT PATCH LPAREN STRING RPAREN NEWLINEfunction_def : DEF ID LPAREN params RPAREN COLON NEWLINE RETURN expression NEWLINEfunction_def : DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINEparams : param COMMA paramsparams : paramparam : ID COLON type_hintparam : IDtype_hint : TYPE_INTtype_hint : TYPE_STRtype_hint : TYPE_FLOATtype_hint : TYPE_BOOLtype_hint : IDexpression : STRINGexpression : NUMBERexpression : LBRACE dict_items RBRACEexpression : LBRACE RBRACEexpression : LBRACKET list_items RBRACKETexpression : LBRACKET RBRACKETlist_items : expression COMMA list_itemslist_items : expressionexpression : IDexpression : ID DOT IDexpression : TRUEexpression : FALSEexpression : NONEdict_items : dict_item COMMA dict_itemsdict_items : dict_itemdict_item : STRING COLON expression'
     
-_lr_action_items = {'IMPORT':([0,3,4,11,],[-7,10,-7,-8,]),'AT':([0,2,3,4,6,9,11,13,16,22,30,63,64,68,],[-7,8,-4,-7,8,-3,-8,-11,-2,-7,-5,-7,-17,-6,]),'NEWLINE':([0,4,18,22,38,46,47,48,49,50,58,59,60,61,63,69,],[4,4,22,4,45,53,54,55,56,57,63,64,-18,-19,4,-20,]),'$end':([1,5,6,12,13,64,],[0,-1,-10,-9,-11,-17,]),'ID':([4,8,9,10,11,14,21,22,30,37,],[-7,15,17,18,-8,19,29,-7,-5,44,]),'DEF':([7,53,54,55,56,57,],[14,-12,-13,-14,-15,-16,]),'DOT':([15,29,],[20,37,]),'EQUALS':([17,],[21,]),'LPAREN':([19,24,25,26,27,28,44,],[23,32,33,34,35,36,51,]),'GET':([20,],[24,]),'POST':([20,],[25,]),'PUT':([20,],[26,]),'DELETE':([20,],[27,]),'PATCH':([20,],[28,]),'RPAREN':([23,39,40,41,42,43,51,],[31,46,47,48,49,50,58,]),'COLON':([31,67,],[38,71,]),'STRING':([32,33,34,35,36,52,62,70,71,],[39,40,41,42,43,60,67,67,60,]),'RETURN':([45,],[52,]),'NUMBER':([52,71,],[61,61,]),'LBRACE':([52,71,],[62,62,]),'COMMA':([60,61,66,69,73,],[-18,-19,70,-20,-23,]),'RBRACE':([60,61,65,66,69,72,73,],[-18,-19,69,-22,-20,-21,-23,]),}
+_lr_action_items = {'IMPORT':([0,3,4,10,],[-7,9,-7,-8,]),'CLASS':([0,2,3,4,6,8,10,17,26,31,39,40,52,79,88,99,],[-7,7,-4,-7,7,-3,-8,-2,-7,-5,-11,-13,-12,-14,-7,-6,]),'AT':([0,2,3,4,5,6,8,10,12,15,17,21,26,31,39,40,52,79,88,99,102,110,],[-7,-10,-4,-7,14,-10,-3,-8,14,-9,-2,-17,-7,-5,-11,-13,-12,-14,-7,-6,-24,-23,]),'NEWLINE':([0,4,19,24,26,56,63,64,65,66,67,68,71,74,75,76,77,78,80,88,90,91,92,93,96,97,98,100,104,108,111,112,115,],[4,4,26,29,4,72,-33,79,-29,-30,-31,-32,81,83,84,85,86,87,88,4,-42,102,-34,-35,-44,-45,-46,110,-37,-39,-43,-36,-38,]),'$end':([1,11,12,20,21,102,110,],[0,-1,-16,-15,-17,-24,-23,]),'ID':([4,7,8,9,10,14,22,25,26,29,31,32,40,41,51,54,57,79,82,89,95,101,114,116,],[-7,16,18,19,-8,23,27,30,-7,38,-5,42,38,53,63,63,42,-14,90,90,90,111,90,90,]),'DEF':([13,83,84,85,86,87,],[22,-18,-19,-20,-21,-22,]),'COLON':([16,38,42,44,55,106,],[24,51,54,56,71,114,]),'EQUALS':([18,],[25,]),'DOT':([23,30,90,],[28,41,101,]),'LPAREN':([27,33,34,35,36,37,53,],[32,46,47,48,49,50,69,]),'GET':([28,],[33,]),'POST':([28,],[34,]),'PUT':([28,],[35,]),'DELETE':([28,],[36,]),'PATCH':([28,],[37,]),'RPAREN':([32,42,43,45,58,59,60,61,62,63,65,66,67,68,69,70,73,],[44,-28,55,-26,74,75,76,77,78,-33,-29,-30,-31,-32,80,-27,-25,]),'COMMA':([42,45,63,65,66,67,68,70,90,92,93,96,97,98,104,105,108,109,111,112,115,118,],[-28,57,-33,-29,-30,-31,-32,-27,-42,-34,-35,-44,-45,-46,-37,113,-39,116,-43,-36,-38,-49,]),'STRING':([46,47,48,49,50,82,89,94,95,113,114,116,],[58,59,60,61,62,92,92,106,92,106,92,92,]),'TYPE_INT':([51,54,],[65,65,]),'TYPE_STR':([51,54,],[66,66,]),'TYPE_FLOAT':([51,54,],[67,67,]),'TYPE_BOOL':([51,54,],[68,68,]),'RETURN':([72,81,],[82,89,]),'NUMBER':([82,89,95,114,116,],[93,93,93,93,93,]),'LBRACE':([82,89,95,114,116,],[94,94,94,94,94,]),'LBRACKET':([82,89,95,114,116,],[95,95,95,95,95,]),'TRUE':([82,89,95,114,116,],[96,96,96,96,96,]),'FALSE':([82,89,95,114,116,],[97,97,97,97,97,]),'NONE':([82,89,95,114,116,],[98,98,98,98,98,]),'RBRACKET':([90,92,93,95,96,97,98,104,107,108,109,111,112,115,119,],[-42,-34,-35,108,-44,-45,-46,-37,115,-39,-41,-43,-36,-38,-40,]),'RBRACE':([90,92,93,94,96,97,98,103,104,105,108,111,112,115,117,118,],[-42,-34,-35,104,-44,-45,-46,112,-37,-48,-39,-43,-36,-38,-47,-49,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'program':([0,],[1,]),'preamble':([0,],[2,]),'optional_newlines':([0,4,22,63,],[3,11,30,68,]),'endpoints':([2,6,],[5,12,]),'endpoint':([2,6,],[6,6,]),'decorator':([2,6,],[7,7,]),'import_stmt':([3,],[9,]),'function_def':([7,],[13,]),'app_creation':([9,],[16,]),'expression':([52,71,],[59,73,]),'dict_items':([62,70,],[65,72,]),'dict_item':([62,70,],[66,66,]),}
+_lr_goto_items = {'program':([0,],[1,]),'preamble':([0,],[2,]),'optional_newlines':([0,4,26,88,],[3,10,31,99,]),'class_definitions':([2,6,],[5,15,]),'class_definition':([2,6,],[6,6,]),'import_stmt':([3,],[8,]),'endpoints':([5,12,],[11,20,]),'endpoint':([5,12,],[12,12,]),'decorator':([5,12,],[13,13,]),'app_creation':([8,],[17,]),'function_def':([13,],[21,]),'class_properties':([29,40,],[39,52,]),'class_property':([29,40,],[40,40,]),'params':([32,57,],[43,73,]),'param':([32,57,],[45,45,]),'type_hint':([51,54,],[64,70,]),'expression':([82,89,95,114,116,],[91,100,109,118,109,]),'dict_items':([94,113,],[103,117,]),'dict_item':([94,113,],[105,105,]),'list_items':([95,116,],[107,119,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -27,27 +27,53 @@ for _k, _v in _lr_goto_items.items():
 del _lr_goto_items
 _lr_productions = [
   ("S' -> program","S'",1,None,None,None),
-  ('program -> preamble endpoints','program',2,'p_program','parser.py',24),
-  ('preamble -> optional_newlines import_stmt app_creation','preamble',3,'p_preamble_full','parser.py',40),
-  ('preamble -> optional_newlines import_stmt','preamble',2,'p_preamble_with_import','parser.py',45),
-  ('preamble -> optional_newlines','preamble',1,'p_preamble_empty','parser.py',50),
-  ('import_stmt -> IMPORT ID NEWLINE optional_newlines','import_stmt',4,'p_import_stmt','parser.py',56),
-  ('app_creation -> ID EQUALS ID DOT ID LPAREN RPAREN NEWLINE optional_newlines','app_creation',9,'p_app_creation','parser.py',62),
-  ('optional_newlines -> <empty>','optional_newlines',0,'p_optional_newlines_empty','parser.py',68),
-  ('optional_newlines -> NEWLINE optional_newlines','optional_newlines',2,'p_optional_newlines_some','parser.py',73),
-  ('endpoints -> endpoint endpoints','endpoints',2,'p_endpoints_multiple','parser.py',79),
-  ('endpoints -> endpoint','endpoints',1,'p_endpoints_single','parser.py',84),
-  ('endpoint -> decorator function_def','endpoint',2,'p_endpoint','parser.py',90),
-  ('decorator -> AT ID DOT GET LPAREN STRING RPAREN NEWLINE','decorator',8,'p_decorator_get','parser.py',100),
-  ('decorator -> AT ID DOT POST LPAREN STRING RPAREN NEWLINE','decorator',8,'p_decorator_post','parser.py',105),
-  ('decorator -> AT ID DOT PUT LPAREN STRING RPAREN NEWLINE','decorator',8,'p_decorator_put','parser.py',110),
-  ('decorator -> AT ID DOT DELETE LPAREN STRING RPAREN NEWLINE','decorator',8,'p_decorator_delete','parser.py',115),
-  ('decorator -> AT ID DOT PATCH LPAREN STRING RPAREN NEWLINE','decorator',8,'p_decorator_patch','parser.py',120),
-  ('function_def -> DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE','function_def',9,'p_function_def','parser.py',126),
-  ('expression -> STRING','expression',1,'p_expression_string','parser.py',136),
-  ('expression -> NUMBER','expression',1,'p_expression_number','parser.py',142),
-  ('expression -> LBRACE dict_items RBRACE','expression',3,'p_expression_dict','parser.py',148),
-  ('dict_items -> dict_item COMMA dict_items','dict_items',3,'p_dict_items_multiple','parser.py',156),
-  ('dict_items -> dict_item','dict_items',1,'p_dict_items_single','parser.py',161),
-  ('dict_item -> STRING COLON expression','dict_item',3,'p_dict_item','parser.py',166),
+  ('program -> preamble class_definitions endpoints','program',3,'p_program','parser.py',49),
+  ('preamble -> optional_newlines import_stmt app_creation','preamble',3,'p_preamble_full','parser.py',67),
+  ('preamble -> optional_newlines import_stmt','preamble',2,'p_preamble_with_import','parser.py',75),
+  ('preamble -> optional_newlines','preamble',1,'p_preamble_empty','parser.py',83),
+  ('import_stmt -> IMPORT ID NEWLINE optional_newlines','import_stmt',4,'p_import_stmt','parser.py',92),
+  ('app_creation -> ID EQUALS ID DOT ID LPAREN RPAREN NEWLINE optional_newlines','app_creation',9,'p_app_creation','parser.py',98),
+  ('optional_newlines -> <empty>','optional_newlines',0,'p_optional_newlines_empty','parser.py',109),
+  ('optional_newlines -> NEWLINE optional_newlines','optional_newlines',2,'p_optional_newlines_some','parser.py',114),
+  ('class_definitions -> class_definition class_definitions','class_definitions',2,'p_class_definitions_multiple','parser.py',123),
+  ('class_definitions -> <empty>','class_definitions',0,'p_class_definitions_empty','parser.py',128),
+  ('class_definition -> CLASS ID COLON NEWLINE class_properties','class_definition',5,'p_class_definition','parser.py',133),
+  ('class_properties -> class_property class_properties','class_properties',2,'p_class_properties_multiple','parser.py',142),
+  ('class_properties -> class_property','class_properties',1,'p_class_properties_single','parser.py',147),
+  ('class_property -> ID COLON type_hint NEWLINE','class_property',4,'p_class_property','parser.py',152),
+  ('endpoints -> endpoint endpoints','endpoints',2,'p_endpoints_multiple','parser.py',162),
+  ('endpoints -> endpoint','endpoints',1,'p_endpoints_single','parser.py',167),
+  ('endpoint -> decorator function_def','endpoint',2,'p_endpoint','parser.py',173),
+  ('decorator -> AT ID DOT GET LPAREN STRING RPAREN NEWLINE','decorator',8,'p_decorator_get','parser.py',183),
+  ('decorator -> AT ID DOT POST LPAREN STRING RPAREN NEWLINE','decorator',8,'p_decorator_post','parser.py',188),
+  ('decorator -> AT ID DOT PUT LPAREN STRING RPAREN NEWLINE','decorator',8,'p_decorator_put','parser.py',193),
+  ('decorator -> AT ID DOT DELETE LPAREN STRING RPAREN NEWLINE','decorator',8,'p_decorator_delete','parser.py',198),
+  ('decorator -> AT ID DOT PATCH LPAREN STRING RPAREN NEWLINE','decorator',8,'p_decorator_patch','parser.py',203),
+  ('function_def -> DEF ID LPAREN params RPAREN COLON NEWLINE RETURN expression NEWLINE','function_def',10,'p_function_def_with_params','parser.py',209),
+  ('function_def -> DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE','function_def',9,'p_function_def_no_params','parser.py',219),
+  ('params -> param COMMA params','params',3,'p_params_multiple','parser.py',230),
+  ('params -> param','params',1,'p_params_single','parser.py',235),
+  ('param -> ID COLON type_hint','param',3,'p_param_typed','parser.py',241),
+  ('param -> ID','param',1,'p_param_untyped','parser.py',250),
+  ('type_hint -> TYPE_INT','type_hint',1,'p_type_hint_int','parser.py',260),
+  ('type_hint -> TYPE_STR','type_hint',1,'p_type_hint_str','parser.py',265),
+  ('type_hint -> TYPE_FLOAT','type_hint',1,'p_type_hint_float','parser.py',270),
+  ('type_hint -> TYPE_BOOL','type_hint',1,'p_type_hint_bool','parser.py',275),
+  ('type_hint -> ID','type_hint',1,'p_type_hint_custom','parser.py',280),
+  ('expression -> STRING','expression',1,'p_expression_string','parser.py',288),
+  ('expression -> NUMBER','expression',1,'p_expression_number','parser.py',293),
+  ('expression -> LBRACE dict_items RBRACE','expression',3,'p_expression_dict','parser.py',298),
+  ('expression -> LBRACE RBRACE','expression',2,'p_expression_empty_dict','parser.py',303),
+  ('expression -> LBRACKET list_items RBRACKET','expression',3,'p_expression_list','parser.py',309),
+  ('expression -> LBRACKET RBRACKET','expression',2,'p_expression_empty_list','parser.py',314),
+  ('list_items -> expression COMMA list_items','list_items',3,'p_list_items_multiple','parser.py',319),
+  ('list_items -> expression','list_items',1,'p_list_items_single','parser.py',324),
+  ('expression -> ID','expression',1,'p_expression_identifier','parser.py',329),
+  ('expression -> ID DOT ID','expression',3,'p_expression_member_access','parser.py',335),
+  ('expression -> TRUE','expression',1,'p_expression_true','parser.py',344),
+  ('expression -> FALSE','expression',1,'p_expression_false','parser.py',349),
+  ('expression -> NONE','expression',1,'p_expression_none','parser.py',354),
+  ('dict_items -> dict_item COMMA dict_items','dict_items',3,'p_dict_items_multiple','parser.py',360),
+  ('dict_items -> dict_item','dict_items',1,'p_dict_items_single','parser.py',365),
+  ('dict_item -> STRING COLON expression','dict_item',3,'p_dict_item','parser.py',370),
 ]
