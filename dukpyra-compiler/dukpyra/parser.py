@@ -7,12 +7,21 @@ from .lexer import lexer, tokens
 # ==============================================================================
 # ส่วนที่ 2: PARSER & CODE GENERATOR
 # หน้าที่หลัก: แปลง Token เป็นโค้ด C# ASP.NET Core Minimal API
+#
+# รองรับ syntax:
+#   import dukpyra
+#   app = dukpyra.app()
+#   
+#   @app.get("/")
+#   def home():
+#       return {"message": "Hello"}
 # ==============================================================================
 
 
 # 2.1 กฎเริ่มต้น (Start Symbol)
+# program สามารถมี import statement และ app creation ก่อน endpoints
 def p_program(p):
-    """program : optional_newlines endpoints"""
+    """program : preamble endpoints"""
     # สร้าง Boilerplate Code ของ ASP.NET Core
     header = """var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
@@ -26,7 +35,35 @@ app.Run();"""
     p[0] = header + p[2] + footer
 
 
-# 2.1.1 กฎสำหรับ newlines ที่อาจมีหรือไม่มีก็ได้ (ตอนต้นไฟล์)
+# 2.1.1 Preamble: import statements และ app creation (ถูกข้ามไปเพราะ C# ไม่ต้องการ)
+def p_preamble_full(p):
+    """preamble : optional_newlines import_stmt app_creation"""
+    pass  # ไม่ต้องเก็บค่า เป็นแค่ Python syntax
+
+
+def p_preamble_with_import(p):
+    """preamble : optional_newlines import_stmt"""
+    pass
+
+
+def p_preamble_empty(p):
+    """preamble : optional_newlines"""
+    pass
+
+
+# 2.1.2 Import Statement: import dukpyra
+def p_import_stmt(p):
+    """import_stmt : IMPORT ID NEWLINE optional_newlines"""
+    pass  # ไม่ต้องแปลงเป็น C# 
+
+
+# 2.1.3 App Creation: app = dukpyra.app()
+def p_app_creation(p):
+    """app_creation : ID EQUALS ID DOT ID LPAREN RPAREN NEWLINE optional_newlines"""
+    pass  # ไม่ต้องแปลงเป็น C#
+
+
+# 2.1.4 กฎสำหรับ newlines ที่อาจมีหรือไม่มีก็ได้
 def p_optional_newlines_empty(p):
     """optional_newlines : """
     pass
@@ -48,7 +85,7 @@ def p_endpoints_single(p):
     p[0] = p[1]
 
 
-# 2.3 กฎแปลง Python Decorator & Function -> C# MapGet/Post
+# 2.3 กฎแปลง Python Decorator & Function -> C# MapGet/Post/Put/Delete/Patch
 def p_endpoint(p):
     """endpoint : decorator function_def"""
     method, url = p[1]
@@ -57,15 +94,31 @@ def p_endpoint(p):
     p[0] = f'app.Map{method}("{url}", () =>\n{{\n    {body}\n}});'
 
 
-# 2.4 กฎสำหรับ Decorator
+# 2.4 กฎสำหรับ Decorator - รองรับ @app.method("/path")
+# ใช้ ID แทน APP เพื่อรองรับชื่อ app ที่ผู้ใช้ตั้งเอง
 def p_decorator_get(p):
-    """decorator : AT APP DOT GET LPAREN STRING RPAREN NEWLINE"""
+    """decorator : AT ID DOT GET LPAREN STRING RPAREN NEWLINE"""
     p[0] = ("Get", p[6])
 
 
 def p_decorator_post(p):
-    """decorator : AT APP DOT POST LPAREN STRING RPAREN NEWLINE"""
+    """decorator : AT ID DOT POST LPAREN STRING RPAREN NEWLINE"""
     p[0] = ("Post", p[6])
+
+
+def p_decorator_put(p):
+    """decorator : AT ID DOT PUT LPAREN STRING RPAREN NEWLINE"""
+    p[0] = ("Put", p[6])
+
+
+def p_decorator_delete(p):
+    """decorator : AT ID DOT DELETE LPAREN STRING RPAREN NEWLINE"""
+    p[0] = ("Delete", p[6])
+
+
+def p_decorator_patch(p):
+    """decorator : AT ID DOT PATCH LPAREN STRING RPAREN NEWLINE"""
+    p[0] = ("Patch", p[6])
 
 
 # 2.5 กฎสำหรับ Function Definition
@@ -76,7 +129,7 @@ def p_function_def(p):
 
 
 # 2.6 กฎสำหรับ Expression (ข้อมูลที่ส่งกลับ)
-# ปรับปรุง: รองรับทั้ง String, Number และ Dictionary ซ้อนกัน
+# รองรับทั้ง String, Number และ Dictionary ซ้อนกัน
 
 
 def p_expression_string(p):
@@ -131,19 +184,23 @@ parser = yacc.yacc()
 # ส่วนที่ 3: ทดสอบการทำงาน (Main Execution)
 # ==============================================================================
 if __name__ == "__main__":
-    # ทดสอบด้วยข้อมูลที่มีทั้ง String, Int และ Dictionary
+    # ทดสอบด้วย syntax ใหม่
     python_code = """
+import dukpyra
+
+app = dukpyra.app()
+
 @app.get("/")
 def home():
-    return {"message": "HI from dukpyra", "age": 4}
+    return {"message": "Hello from Dukpyra!", "version": "1.0"}
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "version": "2.0", "check_id": 99}
+    return {"status": "ok", "uptime": 9999}
 
-@app.get("/test")
-def test_route():
-    return {"message": "test"}
+@app.post("/api/users")
+def create_user():
+    return {"id": 1, "name": "John Doe"}
 """
 
     print("--- โค้ด Python ต้นฉบับ ---")

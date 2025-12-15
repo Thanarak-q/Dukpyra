@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = 'APP AT COLON COMMA DEF DOT GET ID LBRACE LPAREN NEWLINE NUMBER POST RBRACE RETURN RPAREN STRING TYPE_BOOL TYPE_FLOAT TYPE_INT TYPE_STRprogram : optional_newlines endpointsoptional_newlines : optional_newlines : NEWLINE optional_newlinesendpoints : endpoint endpointsendpoints : endpointendpoint : decorator function_defdecorator : AT APP DOT GET LPAREN STRING RPAREN NEWLINEdecorator : AT APP DOT POST LPAREN STRING RPAREN NEWLINEfunction_def : DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINEexpression : STRINGexpression : NUMBERexpression : LBRACE dict_items RBRACEdict_items : dict_item COMMA dict_itemsdict_items : dict_itemdict_item : STRING COLON expression'
+_lr_signature = 'AT COLON COMMA DEF DELETE DOT EQUALS GET ID IMPORT LBRACE LPAREN NEWLINE NUMBER PATCH POST PUT RBRACE RETURN RPAREN STRING TYPE_BOOL TYPE_FLOAT TYPE_INT TYPE_STRprogram : preamble endpointspreamble : optional_newlines import_stmt app_creationpreamble : optional_newlines import_stmtpreamble : optional_newlinesimport_stmt : IMPORT ID NEWLINE optional_newlinesapp_creation : ID EQUALS ID DOT ID LPAREN RPAREN NEWLINE optional_newlinesoptional_newlines : optional_newlines : NEWLINE optional_newlinesendpoints : endpoint endpointsendpoints : endpointendpoint : decorator function_defdecorator : AT ID DOT GET LPAREN STRING RPAREN NEWLINEdecorator : AT ID DOT POST LPAREN STRING RPAREN NEWLINEdecorator : AT ID DOT PUT LPAREN STRING RPAREN NEWLINEdecorator : AT ID DOT DELETE LPAREN STRING RPAREN NEWLINEdecorator : AT ID DOT PATCH LPAREN STRING RPAREN NEWLINEfunction_def : DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINEexpression : STRINGexpression : NUMBERexpression : LBRACE dict_items RBRACEdict_items : dict_item COMMA dict_itemsdict_items : dict_itemdict_item : STRING COLON expression'
     
-_lr_action_items = {'AT':([0,2,3,5,8,10,34,],[-2,7,-2,7,-3,-6,-9,]),'NEWLINE':([0,3,21,25,26,30,31,32,38,],[3,3,24,28,29,34,-10,-11,-12,]),'$end':([1,4,5,9,10,34,],[0,-1,-5,-4,-6,-9,]),'DEF':([6,28,29,],[11,-7,-8,]),'APP':([7,],[12,]),'ID':([11,],[13,]),'DOT':([12,],[14,]),'LPAREN':([13,16,17,],[15,19,20,]),'GET':([14,],[16,]),'POST':([14,],[17,]),'RPAREN':([15,22,23,],[18,25,26,]),'COLON':([18,37,],[21,40,]),'STRING':([19,20,27,33,39,40,],[22,23,31,37,37,31,]),'RETURN':([24,],[27,]),'NUMBER':([27,40,],[32,32,]),'LBRACE':([27,40,],[33,33,]),'COMMA':([31,32,36,38,42,],[-10,-11,39,-12,-15,]),'RBRACE':([31,32,35,36,38,41,42,],[-10,-11,38,-14,-12,-13,-15,]),}
+_lr_action_items = {'IMPORT':([0,3,4,11,],[-7,10,-7,-8,]),'AT':([0,2,3,4,6,9,11,13,16,22,30,63,64,68,],[-7,8,-4,-7,8,-3,-8,-11,-2,-7,-5,-7,-17,-6,]),'NEWLINE':([0,4,18,22,38,46,47,48,49,50,58,59,60,61,63,69,],[4,4,22,4,45,53,54,55,56,57,63,64,-18,-19,4,-20,]),'$end':([1,5,6,12,13,64,],[0,-1,-10,-9,-11,-17,]),'ID':([4,8,9,10,11,14,21,22,30,37,],[-7,15,17,18,-8,19,29,-7,-5,44,]),'DEF':([7,53,54,55,56,57,],[14,-12,-13,-14,-15,-16,]),'DOT':([15,29,],[20,37,]),'EQUALS':([17,],[21,]),'LPAREN':([19,24,25,26,27,28,44,],[23,32,33,34,35,36,51,]),'GET':([20,],[24,]),'POST':([20,],[25,]),'PUT':([20,],[26,]),'DELETE':([20,],[27,]),'PATCH':([20,],[28,]),'RPAREN':([23,39,40,41,42,43,51,],[31,46,47,48,49,50,58,]),'COLON':([31,67,],[38,71,]),'STRING':([32,33,34,35,36,52,62,70,71,],[39,40,41,42,43,60,67,67,60,]),'RETURN':([45,],[52,]),'NUMBER':([52,71,],[61,61,]),'LBRACE':([52,71,],[62,62,]),'COMMA':([60,61,66,69,73,],[-18,-19,70,-20,-23,]),'RBRACE':([60,61,65,66,69,72,73,],[-18,-19,69,-22,-20,-21,-23,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'program':([0,],[1,]),'optional_newlines':([0,3,],[2,8,]),'endpoints':([2,5,],[4,9,]),'endpoint':([2,5,],[5,5,]),'decorator':([2,5,],[6,6,]),'function_def':([6,],[10,]),'expression':([27,40,],[30,42,]),'dict_items':([33,39,],[35,41,]),'dict_item':([33,39,],[36,36,]),}
+_lr_goto_items = {'program':([0,],[1,]),'preamble':([0,],[2,]),'optional_newlines':([0,4,22,63,],[3,11,30,68,]),'endpoints':([2,6,],[5,12,]),'endpoint':([2,6,],[6,6,]),'decorator':([2,6,],[7,7,]),'import_stmt':([3,],[9,]),'function_def':([7,],[13,]),'app_creation':([9,],[16,]),'expression':([52,71,],[59,73,]),'dict_items':([62,70,],[65,72,]),'dict_item':([62,70,],[66,66,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -27,19 +27,27 @@ for _k, _v in _lr_goto_items.items():
 del _lr_goto_items
 _lr_productions = [
   ("S' -> program","S'",1,None,None,None),
-  ('program -> optional_newlines endpoints','program',2,'p_program','parser.py',15),
-  ('optional_newlines -> <empty>','optional_newlines',0,'p_optional_newlines_empty','parser.py',31),
-  ('optional_newlines -> NEWLINE optional_newlines','optional_newlines',2,'p_optional_newlines_some','parser.py',36),
-  ('endpoints -> endpoint endpoints','endpoints',2,'p_endpoints_multiple','parser.py',42),
-  ('endpoints -> endpoint','endpoints',1,'p_endpoints_single','parser.py',47),
-  ('endpoint -> decorator function_def','endpoint',2,'p_endpoint','parser.py',53),
-  ('decorator -> AT APP DOT GET LPAREN STRING RPAREN NEWLINE','decorator',8,'p_decorator_get','parser.py',62),
-  ('decorator -> AT APP DOT POST LPAREN STRING RPAREN NEWLINE','decorator',8,'p_decorator_post','parser.py',67),
-  ('function_def -> DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE','function_def',9,'p_function_def','parser.py',73),
-  ('expression -> STRING','expression',1,'p_expression_string','parser.py',83),
-  ('expression -> NUMBER','expression',1,'p_expression_number','parser.py',89),
-  ('expression -> LBRACE dict_items RBRACE','expression',3,'p_expression_dict','parser.py',95),
-  ('dict_items -> dict_item COMMA dict_items','dict_items',3,'p_dict_items_multiple','parser.py',103),
-  ('dict_items -> dict_item','dict_items',1,'p_dict_items_single','parser.py',108),
-  ('dict_item -> STRING COLON expression','dict_item',3,'p_dict_item','parser.py',113),
+  ('program -> preamble endpoints','program',2,'p_program','parser.py',24),
+  ('preamble -> optional_newlines import_stmt app_creation','preamble',3,'p_preamble_full','parser.py',40),
+  ('preamble -> optional_newlines import_stmt','preamble',2,'p_preamble_with_import','parser.py',45),
+  ('preamble -> optional_newlines','preamble',1,'p_preamble_empty','parser.py',50),
+  ('import_stmt -> IMPORT ID NEWLINE optional_newlines','import_stmt',4,'p_import_stmt','parser.py',56),
+  ('app_creation -> ID EQUALS ID DOT ID LPAREN RPAREN NEWLINE optional_newlines','app_creation',9,'p_app_creation','parser.py',62),
+  ('optional_newlines -> <empty>','optional_newlines',0,'p_optional_newlines_empty','parser.py',68),
+  ('optional_newlines -> NEWLINE optional_newlines','optional_newlines',2,'p_optional_newlines_some','parser.py',73),
+  ('endpoints -> endpoint endpoints','endpoints',2,'p_endpoints_multiple','parser.py',79),
+  ('endpoints -> endpoint','endpoints',1,'p_endpoints_single','parser.py',84),
+  ('endpoint -> decorator function_def','endpoint',2,'p_endpoint','parser.py',90),
+  ('decorator -> AT ID DOT GET LPAREN STRING RPAREN NEWLINE','decorator',8,'p_decorator_get','parser.py',100),
+  ('decorator -> AT ID DOT POST LPAREN STRING RPAREN NEWLINE','decorator',8,'p_decorator_post','parser.py',105),
+  ('decorator -> AT ID DOT PUT LPAREN STRING RPAREN NEWLINE','decorator',8,'p_decorator_put','parser.py',110),
+  ('decorator -> AT ID DOT DELETE LPAREN STRING RPAREN NEWLINE','decorator',8,'p_decorator_delete','parser.py',115),
+  ('decorator -> AT ID DOT PATCH LPAREN STRING RPAREN NEWLINE','decorator',8,'p_decorator_patch','parser.py',120),
+  ('function_def -> DEF ID LPAREN RPAREN COLON NEWLINE RETURN expression NEWLINE','function_def',9,'p_function_def','parser.py',126),
+  ('expression -> STRING','expression',1,'p_expression_string','parser.py',136),
+  ('expression -> NUMBER','expression',1,'p_expression_number','parser.py',142),
+  ('expression -> LBRACE dict_items RBRACE','expression',3,'p_expression_dict','parser.py',148),
+  ('dict_items -> dict_item COMMA dict_items','dict_items',3,'p_dict_items_multiple','parser.py',156),
+  ('dict_items -> dict_item','dict_items',1,'p_dict_items_single','parser.py',161),
+  ('dict_item -> STRING COLON expression','dict_item',3,'p_dict_item','parser.py',166),
 ]

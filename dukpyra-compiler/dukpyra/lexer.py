@@ -9,12 +9,15 @@ import ply.lex as lex
 # 1.1 คำสงวน (Reserved Words)
 # คือคำที่มีความหมายเฉพาะในภาษา Python หรือ Framework ห้ามนำไปตั้งชื่อตัวแปร
 reserved = {
+    "import": "IMPORT",  # คำสั่ง import
     "def": "DEF",  # ใช้สำหรับประกาศฟังก์ชัน
     "return": "RETURN",  # คำสั่งส่งค่ากลับจากฟังก์ชัน
     "get": "GET",  # คำสั่ง HTTP Method GET
     "post": "POST",  # คำสั่ง HTTP Method POST
-    "app": "APP",  # ชื่อตัวแปร app (Web Application)
-    # ประเภทตัวแปร (Data Types)
+    "put": "PUT",  # คำสั่ง HTTP Method PUT
+    "delete": "DELETE",  # คำสั่ง HTTP Method DELETE
+    "patch": "PATCH",  # คำสั่ง HTTP Method PATCH
+    # ประเภทตัวแปร (Data Types) - สำหรับอนาคต
     "int": "TYPE_INT",
     "str": "TYPE_STR",
     "float": "TYPE_FLOAT",
@@ -25,7 +28,7 @@ reserved = {
 # เป็นบัญชีรายชื่อที่ Lexer ต้องรู้จัก ทั้งแบบสัญลักษณ์และคำสงวน
 tokens = [
     "ID",  # Identifier: ชื่อตัวแปร หรือชื่อฟังก์ชันที่ผู้ใช้ตั้งเอง
-    "NUMBER",  # Number: ตัวเลข (เพิ่มส่วนนี้ที่ขาดหายไป)
+    "NUMBER",  # Number: ตัวเลข
     "STRING",  # String: ข้อความตัวอักษรที่อยู่ในเครื่องหมายคำพูด ""
     "LPAREN",  # Left Parenthesis: วงเล็บเปิด (
     "RPAREN",  # Right Parenthesis: วงเล็บปิด )
@@ -35,6 +38,7 @@ tokens = [
     "COMMA",  # Comma: เครื่องหมายจุลภาค ,
     "AT",  # At sign: เครื่องหมาย @ (ใช้สำหรับ Decorator)
     "DOT",  # Dot: จุด .
+    "EQUALS",  # Equals: เครื่องหมายเท่ากับ = (สำหรับ assignment)
     "NEWLINE",  # Newline: การขึ้นบรรทัดใหม่ (สำคัญมากใน Python)
 ] + list(reserved.values())  # นำรายชื่อคำสงวนมารวมเข้าไปใน List นี้ด้วย
 
@@ -47,6 +51,7 @@ t_COLON = r":"
 t_COMMA = r","
 t_AT = r"@"
 t_DOT = r"\."
+t_EQUALS = r"="
 t_ignore = " \t"
 
 # 1.4 กฎการตัดคำแบบซับซ้อน (Function Rules)
@@ -64,7 +69,7 @@ def t_ID(t):
     return t
 
 
-# เพิ่มกฎสำหรับตัวเลข (Number) กลับเข้ามา
+# กฎสำหรับตัวเลข (Number)
 def t_NUMBER(t):
     r"\d+"
     t.value = int(t.value)
