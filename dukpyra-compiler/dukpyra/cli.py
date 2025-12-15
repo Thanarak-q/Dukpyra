@@ -241,6 +241,25 @@ class FileWatcher(FileSystemEventHandler):
 
 
 
+
+
+
+# ============================================================================
+# CLI Commands
+# ============================================================================
+
+
+@click.group()
+@click.version_option(version="0.1.0", prog_name="dukpyra")
+def cli():
+    """
+    🚀 Dukpyra - Python to ASP.NET Core Compiler
+
+    Convert Python web frameworks to high-performance ASP.NET Core
+    """
+    pass
+
+
 @cli.command()
 @click.option("--port", default=8000, help="Port to run profiling server")
 def profile(port):
@@ -271,21 +290,6 @@ def profile(port):
     except Exception as e:
         click.echo(f"❌ Profiler error: {e}", err=True)
 
-
-# ============================================================================
-# CLI Commands
-# ============================================================================
-
-
-@click.group()
-@click.version_option(version="0.1.0", prog_name="dukpyra")
-def cli():
-    """
-    🚀 Dukpyra - Python to ASP.NET Core Compiler
-
-    Convert Python web frameworks to high-performance ASP.NET Core
-    """
-    pass
 
 
 @cli.command()
