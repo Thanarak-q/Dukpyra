@@ -8,8 +8,9 @@ Architecture:
     Source Code → Lexer → Parser → AST → CodeGen → C# Code (via Templates)
 """
 
+import json
 import os
-from typing import List, Dict, Any
+from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
 from .ast import (
@@ -35,7 +36,6 @@ from .ast import (
     ListExpr,
 )
 
-
 class CSharpCodeGenerator:
     """
     Generates C# ASP.NET Core Minimal API code from Dukpyra AST.
@@ -48,8 +48,19 @@ class CSharpCodeGenerator:
         template_dir = os.path.join(os.path.dirname(__file__), 'templates')
         self.env = Environment(loader=FileSystemLoader(template_dir))
         self.template = self.env.get_template('Program.cs.j2')
-    
+        
+        # Load Runtime Types if available
+        self.collected_types = {}
+        types_path = Path(".dukpyra/types.json")
+        if types_path.exists():
+            try:
+                with open(types_path, "r") as f:
+                    self.collected_types = json.load(f)
+            except Exception:
+                pass # Ignore load errors
+
     def generate(self, program: ProgramNode) -> str:
+        # ... (same as before) ...
         """
         Generate complete C# code from a ProgramNode.
         
@@ -69,6 +80,7 @@ class CSharpCodeGenerator:
         )
     
     def visit_class(self, node: ClassDefNode) -> str:
+        # ... (same as before) ...
         """
         Generate C# record type definition string.
         """
@@ -79,14 +91,16 @@ class CSharpCodeGenerator:
         
         params_str = ", ".join(params)
         return f"public record {node.name}({params_str});"
-    
+
     def visit_endpoint(self, node: EndpointNode) -> Dict[str, str]:
         """
         Prepare endpoint data for template.
         """
         method = node.decorator.method.capitalize()
         path = node.decorator.path
-        params = self.visit_params(node.function.params)
+        
+        # Pass function name to visit_params to lookup types
+        params = self.visit_params(node.function.params, func_name=node.function.name)
         
         if node.raw_csharp:
             body = node.raw_csharp
@@ -100,7 +114,7 @@ class CSharpCodeGenerator:
             "body": body
         }
     
-    def visit_params(self, params: list) -> str:
+    def visit_params(self, params: list, func_name: str = "") -> str:
         """
         Generate C# lambda parameter list string.
         """
@@ -110,6 +124,13 @@ class CSharpCodeGenerator:
         param_strs = []
         for param in params:
             csharp_type = self.python_type_to_csharp(param.type_hint)
+            
+            # If type is dynamic (unknown), try to find it in collected types
+            if csharp_type == "dynamic" and func_name in self.collected_types:
+                collected = self.collected_types[func_name].get(param.name)
+                if collected:
+                    csharp_type = self.python_type_to_csharp(collected)
+
             param_strs.append(f"{csharp_type} {param.name}")
         
         return ", ".join(param_strs)

@@ -240,6 +240,38 @@ class FileWatcher(FileSystemEventHandler):
                 self.restart_callback()
 
 
+
+@cli.command()
+@click.option("--port", default=8000, help="Port to run profiling server")
+def profile(port):
+    """
+    Run the project in Python mode for Type Collection.
+    
+    This runs your API using FastAPI/Uvicorn to collect runtime argument types.
+    Send requests to this server to improve C# compilation accuracy.
+    """
+    click.echo("🕵️ Starting Dukpyra Profiler...")
+    click.echo("   Send requests to your API to collect types.")
+    
+    try:
+        import uvicorn
+    except ImportError:
+        click.echo("❌ 'uvicorn' not found. Please install requirements.", err=True)
+        return
+        
+    # Assume main.py:app structure. The user's code will call dukpyra.app()
+    # which returns our Runtime wrapper. Our wrapper has .app property which is the FastAPI app.
+    
+    click.echo(f"   Running 'main:app.app' on port {port}")
+    click.echo("   Press Ctrl+C to stop profiling.\n")
+    
+    try:
+        # We need to target the internal FastAPI app inside our wrapper
+        uvicorn.run("main:app.app", host="0.0.0.0", port=port, reload=True)
+    except Exception as e:
+        click.echo(f"❌ Profiler error: {e}", err=True)
+
+
 # ============================================================================
 # CLI Commands
 # ============================================================================

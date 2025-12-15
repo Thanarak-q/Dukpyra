@@ -49,6 +49,17 @@ This project is developed as part of a **compiler construction research** explor
 
 ---
 
+---
+
+## 🔬 Architecture & Research
+
+โปรเจกต์นี้ได้รับการออกแบบโดยอ้างอิงงานวิจัยด้าน Compiler Engineering สมัยใหม่:
+
+1.  **Runtime Type Collection (Dynamic to Static)**: ใช้การเก็บข้อมูลขณะรันไทม์เพื่อแปลงโค้ด Dynamic Typing ของ Python เป็น Static Typing ของ C# ได้อย่างแม่นยำ *[6] P. Krivanek and R. Uttner*
+2.  **Templates and transformation synergy**: แยก Tramsformation Logic ออกจาก Code Generation โดยใช้ Template Engine (Jinja2) ตามแนวทางของ *[5] Robert Eikermann et al.* ทำให้โครงสร้างโค้ดปลายทางยืดหยุ่นกว่าการต่อ String
+3.  **User-guided "Last Mile" construction**: แก้ปัญหาที่ Compiler แปลง Logic ซับซ้อนไม่ได้ทั้งหมดด้วยฟีเจอร์ "Raw C# Injection" ตามแนวคิดของ *[4] DuoGlot (Bo Wang et al.)*
+4.  **Rule-driven AST rewriting**: ใช้พื้นฐานการแปลงแบบ Rule-based ตามมาตรฐานงานวิจัยของ *[1] Lachaux et al.*
+
 ## 🏗️ Architecture
 
 Dukpyra implements a **5-stage compiler pipeline**:
@@ -116,6 +127,7 @@ def create_user(body: CreateUser):
 | Booleans | ✅ | `True`/`False` → `true`/`false` |
 | None | ✅ | `None` → `null` |
 | Semantic Analysis | ✅ | Error detection with line numbers |
+| **Runtime Profiling** | ✅ | `dukpyra profile` → Auto-detect `int`/`bool` |
 
 ### Semantic Validation
 
