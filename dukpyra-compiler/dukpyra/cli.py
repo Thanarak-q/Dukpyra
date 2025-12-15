@@ -18,10 +18,12 @@ from watchdog.observers import Observer
 # Import จาก modules อื่นใน package
 try:
     from .parser import parse
+    from .analyzer import analyze
     from .codegen import generate_csharp
 except ImportError:
     # ถ้ารันโดยตรงไม่ผ่าน package
     parse = None
+    analyze = None
     generate_csharp = None
 
 
@@ -55,7 +57,7 @@ class DukpyraCompiler:
         """
         แปลงไฟล์ Python หนึ่งไฟล์เป็น C#
         
-        Pipeline: Source → Parser → AST → CodeGen → C#
+        Pipeline: Source → Parser → AST → Analyzer → CodeGen → C#
         """
         with open(python_file, "r", encoding="utf-8") as f:
             python_code = f.read()
@@ -68,7 +70,20 @@ class DukpyraCompiler:
                 click.echo(f"❌ Failed to parse {python_file.name}", err=True)
                 return ""
             
-            # Step 2: Generate C# code from AST
+            # Step 2: Semantic Analysis
+            result = analyze(ast)
+            
+            # Display warnings (don't stop compilation)
+            for warning in result.warnings:
+                click.echo(f"⚠️  {warning}", err=True)
+            
+            # Display errors and stop if any
+            if result.has_errors:
+                for error in result.errors:
+                    click.echo(f"❌ {error}", err=True)
+                return ""
+            
+            # Step 3: Generate C# code from AST
             csharp_code = generate_csharp(ast)
             
             return csharp_code if csharp_code else ""
