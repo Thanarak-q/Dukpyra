@@ -1,0 +1,4 @@
+# Dukpyra
+.dukpyra/
+__pycache__/
+*.pyc
