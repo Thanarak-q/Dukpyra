@@ -15,21 +15,23 @@
 
 ## 📚 Research Context
 
-This project is developed as part of a **compiler construction research** exploring the feasibility of:
+This project is developed as part of a **compiler construction research** exploring **runtime type collection and transpilation from dynamic to static languages**, based on the methodology of **P. Krivanek and R. Uttner**.
 
-1. **Cross-language transpilation** - Converting Python web API definitions to C# ASP.NET Core
-2. **Domain-specific language design** - Creating a Python DSL for web API development
-3. **Semantic analysis** - Implementing validation and error detection before code generation
+### Core Research Question
+
+**How can we transpile Python (dynamic typing) to C# (static typing) accurately using runtime type profiling?**
+
+The answer: Collect actual type information during runtime execution and use it to generate precisely-typed C# code - a technique documented in *"Runtime type collecting and transpilation to a static language"*.
 
 ### Research Objectives
 
-| Objective | Description |
-|-----------|-------------|
-| **RO1** | Design a lexer and parser for Python API syntax using PLY |
-| **RO2** | Implement an Abstract Syntax Tree (AST) representation |
-| **RO3** | Create a semantic analyzer for validation |
-| **RO4** | Generate correct C# code from AST |
-| **RO5** | Evaluate the transpiler with real-world API patterns |
+| Objective | Description | Status |
+|-----------|-------------|---------|
+| **RO1** | Design a lexer and parser for Python API syntax using PLY | ✅ Complete |
+| **RO2** | Implement an Abstract Syntax Tree (AST) representation | ✅ Complete |
+| **RO3** | Create a semantic analyzer for validation | ✅ Complete |
+| **RO4** | Generate correct C# code from AST with runtime type data | ✅ Complete |
+| **RO5** | Evaluate the transpiler with real-world API patterns | 🔄 In Progress |
 
 ### Scope & Limitations
 
@@ -37,7 +39,9 @@ This project is developed as part of a **compiler construction research** explor
 - HTTP methods: GET, POST, PUT, DELETE, PATCH
 - Path and query parameters with type hints
 - Request/response bodies via class definitions
+- **Runtime type profiling** for dynamic code
 - Basic data types: int, str, float, bool, list, dict
+- Nested type inference: `List[int]`, `Dict[str, User]`
 - Semantic validation: duplicates, undefined refs, type checking
 
 **Out of Scope:**
@@ -49,18 +53,69 @@ This project is developed as part of a **compiler construction research** explor
 
 ---
 
+## 🔬 Runtime Type Collection Methodology
+
+Dukpyra implements the **runtime type collection** approach from research literature:
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│         RUNTIME TYPE COLLECTION (Krivanek & Uttner)             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  1. Profile Runtime                                             │
+│     ┌──────────────┐                                            │
+│     │ Python Code  │───▶ Execute ───▶  Collect Types           │
+│     │ (no hints)   │                   (.dukpyra/types.json)    │
+│     └──────────────┘                                            │
+│                                                                 │
+│  2. Transpile with Type Data                                    │
+│     ┌──────────────┐       ┌─────────────┐                     │
+│     │ Python Code  │──────▶│  Compiler   │                     │
+│     └──────────────┘   +   │  Pipeline   │───▶ C# Code         │
+│     ┌──────────────┐       └─────────────┘                     │
+│     │ types.json   │──────▶                                     │
+│     └──────────────┘                                            │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Type Inference Priority
+
+1. **Runtime profiled types** (Primary) - from `.dukpyra/types.json`
+2. **Static type hints** (Fallback) - from source code annotations
+3. **Dynamic type** (Last resort) - C# `dynamic` keyword
+
+### Example
+
+```python
+# Python code WITHOUT type hints
+@app.get("/process")
+def process(numbers):  # ← No type hint!
+    return [x * 2 for x in numbers]
+```
+
+```bash
+# Step 1: Profile runtime
+$ dukpyra profile
+# Calls process([1, 2, 3]) → Detects: numbers = List[int]
+
+# Step 2: Build
+$ dukpyra build
+```
+
+```csharp
+// Generated C# with runtime-inferred types
+app.MapGet("/process", (List<int> numbers) =>
+{
+    return Results.Ok(numbers.Select(x => x * 2).ToList());
+});
+```
+
+**Key Insight**: Even without type hints, Dukpyra infers `List<int>` from runtime observation!
+
 ---
-
-## 🔬 Architecture & Research
-
-โปรเจกต์นี้ได้รับการออกแบบโดยอ้างอิงงานวิจัยด้าน Compiler Engineering สมัยใหม่:
-
-1.  **Runtime Type Collection (Dynamic to Static)**: ใช้การเก็บข้อมูลขณะรันไทม์เพื่อแปลงโค้ด Dynamic Typing ของ Python เป็น Static Typing ของ C# ได้อย่างแม่นยำ *[6]*
-2.  **Templates and transformation synergy**: แยก Tramsformation Logic ออกจาก Code Generation โดยใช้ Template Engine (Jinja2) ตามแนวทางของ *[5]* ทำให้โครงสร้างโค้ดปลายทางยืดหยุ่นกว่าการต่อ String
-3.  **User-guided "Last Mile" construction**: แก้ปัญหาที่ Compiler แปลง Logic ซับซ้อนไม่ได้ทั้งหมดด้วยฟีเจอร์ "Raw C# Injection" ตามแนวคิดของ *[4]*
-4.  **Rule-driven AST rewriting**: ใช้พื้นฐานการแปลงแบบ Rule-based ตามมาตรฐานงานวิจัยของ *[1]*
-5.  **High-Level IR Optimization**: มอง Python เป็น High-Level IR เพื่อแปลง Structure ที่ซับซ้อน (เช่น List Comprehension) ให้เป็น Optimized Code (LINQ) ตามแนวทางของ *[7]*
-
 
 ## 🏗️ Architecture
 
@@ -73,21 +128,26 @@ Dukpyra implements a **5-stage compiler pipeline**:
 │                                                                    │
 │  Python   ┌────────┐  ┌────────┐  ┌─────┐  ┌──────────┐  ┌──────┐ │
 │  Source ─▶│ Lexer  │─▶│ Parser │─▶│ AST │─▶│ Analyzer │─▶│CodeGen│─▶ C#
-│           │ (PLY)  │  │ (LALR) │  │     │  │          │  │      │ │
+│           │ (PLY)  │  │ (LALR) │  │     │  │          │  │ +types│ │
 │           └────────┘  └────────┘  └─────┘  └──────────┘  └──────┘ │
+│                                                 ▲            │     │
+│                                                 │            │     │
+│                          Runtime Profiler ─────┘            │     │
+│                          (.dukpyra/types.json)              │     │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 | Stage | File | Lines | Description |
 |-------|------|-------|-------------|
-| Lexer | `lexer.py` | 116 | Tokenizes Python source into tokens |
-| Parser | `parser.py` | 450 | Builds AST using LALR(1) grammar |
-| AST | `ast.py` | 330 | Node definitions (15 types) |
-| Analyzer | `analyzer.py` | 300 | Semantic validation (7 error types) |
-| CodeGen | `codegen.py` | 330 | Generates C# from AST |
+| Lexer | `lexer.py` | ~500 | Tokenizes Python source | 
+| Parser | `parser.py` | ~450 | Builds AST using LALR(1) grammar |
+| AST | `ast.py` | ~700 | Node definitions with detailed docs |
+| Analyzer | `analyzer.py` | ~300 | Semantic validation |
+| CodeGen | `codegen.py` | ~330 | Generates C# from AST + runtime types |
+| **Runtime** | `runtime.py` | ~400 | **Type collection during execution** |
 
-**Total: ~2,100 lines of code**
+**Total: ~2,700 lines of code**
 
 ---
 
@@ -115,11 +175,10 @@ def get_user(id: int):
 def create_user(body: CreateUser):
     return {"created": True, "name": body.name}
 
-# Optimized LINQ generation
+# ✨ NEW: Runtime type profiling
 @app.get("/active-users")
-def get_active_users(users: list):
-    # Python: List Comprehension
-    # C#: users.Where(u => u.active).Select(u => u.name).ToList()
+def get_active_users(users):  # No type hint needed!
+    # Dukpyra profiles this at runtime and infers: List[User]
     return [u.name for u in users if u.active]
 ```
 
@@ -130,14 +189,13 @@ def get_active_users(users: list):
 | GET/POST/PUT/DELETE/PATCH | ✅ | `@app.get("/path")` |
 | Path Parameters | ✅ | `/users/{id}` |
 | Query Parameters | ✅ | `def search(q: str):` |
-| Type Hints | ✅ | `int`, `str`, `float`, `bool` |
+| Type Hints (Static) | ✅ | `int`, `str`, `float`, `bool` |
+| **Runtime Type Profiling** | ✅ NEW | `dukpyra profile` |
+| **Nested Type Inference** | ✅ NEW | `List[int]`, `Dict[str, User]` |
+| **Custom Class Detection** | ✅ NEW | Auto-detect `User`, `Product` |
 | Request Bodies | ✅ | `class Model:` → C# record |
-| Lists | ✅ | `[1, 2, 3]` → `new[] {...}` |
-| Booleans | ✅ | `True`/`False` → `true`/`false` |
-| None | ✅ | `None` → `null` |
+| LINQ Generation | ✅ | `[x for x in list]` → `list.Select(...)` |
 | Semantic Analysis | ✅ | Error detection with line numbers |
-| **Runtime Profiling** | ✅ | `dukpyra profile` → Auto-detect `int`/`bool` |
-| **High-Level IR (LINQ)** | ✅ | `[x for x in list]` → `list.Select(...)` |
 
 ### Semantic Validation
 
@@ -153,7 +211,7 @@ def get_active_users(users: list):
 
 ---
 
-## � Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
 
@@ -164,7 +222,7 @@ def get_active_users(users: list):
 
 ```bash
 # Clone the repository
-git clone https://github.com/Thanarak-q/Dukpyra.git
+git clone https://github.com/Thanarak-q/Dukpyra.git  
 cd Dukpyra/dukpyra-compiler
 
 # Install as CLI tool
@@ -177,19 +235,42 @@ pip install -e .
 # Initialize new project
 dukpyra init
 
+# 🆕 Profile runtime types (recommended workflow)
+dukpyra profile
+
 # Run development server with hot reload
 dukpyra run
 
-# Build only (no run)
+# Build only (no run) 
 dukpyra build
 
 # Clean generated files
 dukpyra clean
 ```
 
+### Recommended Workflow
+
+```bash
+# 1. Write Python code (with or without type hints)
+vim main.py
+
+# 2. Profile to collect runtime types
+dukpyra profile
+# ↑ Runs your code and saves type data to .dukpyra/types.json
+
+# 3. Build (uses profiled types for better inference)
+dukpyra build
+
+# 4. Run
+cd build
+dotnet run
+```
+
 ---
 
 ## 📊 Type Mapping
+
+### Basic Types
 
 | Python | C# |
 |--------|-----|
@@ -198,28 +279,43 @@ dukpyra clean
 | `float` | `double` |
 | `bool` | `bool` |
 | `None` | `null` |
-| `list` | `new[] {...}` |
-| `dict` | `new {...}` |
-| Custom class | `public record` |
+
+### Collections (NEW - Enhanced)
+
+| Python | C# (Runtime Profiled) |
+|--------|----------------------|
+| `[1, 2, 3]` | `List<int>` |
+| `["a", "b"]` | `List<string>` |
+| `[User(), User()]` | `List<User>` |
+| `{"name": "John", "age": 30}` | `Dictionary<string, dynamic>` |
+
+### Custom Types
+
+| Python | C# |
+|--------|-----|
+| `class User: ...` | `public record User(...)` |
 
 ---
 
 ## 🔜 Future Work
 
 ### Short Term
+- [ ] Enhanced type conflict resolution (when function called with different types)
 - [ ] Default parameter values
-- [ ] Negative numbers
+- [ ] Negative numbers in lexer
 - [ ] Response type annotations
 
 ### Medium Term
 - [ ] HTTP status codes
-- [ ] Middleware support
+- [ ] Confidence scoring for profiled types
+- [ ] Generator expressions
 - [ ] Error handling patterns
 
 ### Long Term
 - [ ] Async/await support
-- [ ] Database integration
-- [ ] Swagger generation
+- [ ] Benchmark suite (evaluate RO5)
+- [ ] User study for compiler usability
+- [ ] Multi-target code generation (TypeScript, Go, Rust)
 
 ---
 
@@ -229,11 +325,12 @@ dukpyra clean
 Dukpyra/
 ├── dukpyra-compiler/          # Compiler source
 │   └── dukpyra/
-│       ├── lexer.py           # Tokenizer
-│       ├── parser.py          # Grammar → AST
-│       ├── ast.py             # AST node definitions
-│       ├── analyzer.py        # Semantic analysis
-│       ├── codegen.py         # AST → C#
+│       ├── lexer.py           # Tokenizer (~500 lines)
+│       ├── parser.py          # Grammar → AST (~450 lines)
+│       ├── ast.py             # AST node definitions (~700 lines)
+│       ├── analyzer.py        # Semantic analysis (~300 lines)
+│       ├── codegen.py         # AST → C# (~330 lines)
+│       ├── runtime.py         # 🆕 Runtime type profiler (~400 lines)
 │       └── cli.py             # CLI commands
 ├── my-test-backend/           # Example project
 │   └── main.py                # Sample API
@@ -259,7 +356,7 @@ curl -X POST http://localhost:5000/users \
 
 ---
 
-## � License
+## 📄 License
 
 MIT License
 
@@ -277,19 +374,36 @@ MIT License
 
 ---
 
+## 📚 Research Reference
 
-## 📚 References
+**Primary Reference:**
 
-[1] M.-A. Lachaux, B. Roziere, L. Chanussot, and G. Lample, “Unsupervised Translation of Programming Languages,” *arXiv: Computation and Language*, June 2020.
+P. Krivanek and R. Uttner, "Runtime type collecting and transpilation to a static language," *CEUR Workshop Proceedings*, vol. 3893, 2024.  
+[[PDF]](https://ceur-ws.org/Vol-3893/Paper08.pdf)
 
-[4] “User-Customizable Transpilation of Scripting Languages,” Jan. 2023, doi: 10.48550/arxiv.2301.11220.
+### Citation
 
-[5] R. Eikermann, K. Hölldobler, A. Roth, and B. Rumpe, “Reuse and Customization for Code Generators: Synergy by Transformations and Templates,” pp. 34–55, Jan. 2018, doi: 10.1007/978-3-030-11030-7_3.
+```bibtex
+@inproceedings{krivanek2024runtime,
+  title={Runtime type collecting and transpilation to a static language},
+  author={Krivanek, P. and Uttner, R.},
+  booktitle={CEUR Workshop Proceedings},
+  volume={3893},
+  year={2024},
+  url={https://ceur-ws.org/Vol-3893/Paper08.pdf}
+}
+```
 
-[6] “Runtime type collecting and transpilation to a static language”, [Online]. Available: https://ceur-ws.org/Vol-3893/Paper08.pdf
+### Key Contributions from Research
 
-[7] M. Bysiek, M. Wahib, A. Drozd, and S. Matsuoka, “Towards Portable High Performance in Python: Transpilation, High-Level IR, Code Transformations and Compiler Directives,” no. 38, pp. 1–7, July 2018.
+1. **Runtime Type Collection**: Profiling actual values during execution
+2. **Dynamic-to-Static Conversion**: Using profiled data for static typing
+3. **Documented Limitations**: Stateful traits, metaprogramming constraints
+4. **Practical Application**: Web API domain focus for controlled scope
+
+---
 
 <p align="center">
-  <b>Version 0.3.0 - Research Build</b>
+  <b>Version 0.3.0 - Research Build</b><br>
+  Implementing Runtime Type Collection Methodology
 </p>

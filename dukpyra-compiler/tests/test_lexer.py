@@ -1,7 +1,38 @@
 """
-Dukpyra Compiler Unit Tests - Lexer
+==============================================================================
+TEST_LEXER.PY - Lexer Unit Tests
+==============================================================================
+ไฟล์นี้ทดสอบการทำงานของ Lexer (ตัวตัดคำ)
 
-Comprehensive tests for the lexer module that tokenizes Python source code.
+Test Coverage:
+    1. Keywords (import, def, class, return)
+    2. HTTP Methods (get, post, put, delete, patch)
+    3. Literals (True, False, None, numbers, strings)
+    4. Symbols (parentheses, braces, brackets, @, .)
+    5. Type Hints (int, str, float, bool)
+    6. Decorators (@app.get("/path"))
+    7. Function Definitions
+
+การรัน Tests:
+    # รัน specific test file
+    pytest tests/test_lexer.py -v
+    
+    # รัน test class เดียว
+    pytest tests/test_lexer.py::TestLexerKeywords -v
+    
+    # รัน test function เดียว
+    pytest tests/test_lexer.py::TestLexerKeywords::test_import_keyword -v
+
+Test Structure:
+    - แต่ละ class test feature ต่างๆ
+    - แต่ละ method test case เดียว
+    - ใช้ assert เพื่อตรวจสอบผลลัพธ์
+
+Expected Behavior:
+    - Lexer ต้องแยก tokens ได้ถูกต้อง
+    - Type และ value ของ token ต้องตรงตามที่คาดหวัง
+    - All tests should pass ✓
+==============================================================================
 """
 
 import pytest
