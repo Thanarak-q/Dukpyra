@@ -39,52 +39,86 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     # ========== Package Identity ==========
-    name="dukpyra",                     # ชื่อ package (ใช้ตอน pip install)
-    version="0.1.0",                    # เวอร์ชัน (Semantic Versioning)
-    author="Your Name",                 # TODO: อัปเดตเป็นชื่อจริง
-    author_email="your.email@example.com",  # TODO: อัปเดตเป็น email จริง
+    name="dukpyra",
+    version="0.3.0",  # Research version (runtime type collection)
+    author="Dukpyra Team",
+    author_email="dukpyra@example.com",
     
     # ========== Description ==========
-    description="Python to ASP.NET Core Compiler",  # คำอธิบายสั้นๆ
-    long_description=long_description,   # คำอธิบายยาว (จาก README.md)
-    long_description_content_type="text/markdown",  # รูปแบบของ long_description
+    description="Python → C# Backend Framework Compiler with Runtime Type Collection",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     
     # ========== URLs ==========
-    url="https://github.com/yourusername/dukpyra",  # TODO: อัปเดต GitHub URL
+    url="https://github.com/yourusername/dukpyra",
+    project_urls={
+        "Bug Tracker": "https://github.com/yourusername/dukpyra/issues",
+        "Documentation": "https://github.com/yourusername/dukpyra",
+        "Source Code": "https://github.com/yourusername/dukpyra",
+    },
     
     # ========== Package Discovery ==========
-    packages=find_packages(),  # หา packages ทั้งหมดอัตโนมัติ (dukpyra, dukpyra.*)
+    packages=find_packages(),
     
-    # ========== Classifiers (Metadata สำหรับ PyPI) ==========
+    # ========== Classifiers ==========
     classifiers=[
-        "Development Status :: 3 - Alpha",         # สถานะการพัฒนา (Alpha/Beta/Stable)
-        "Intended Audience :: Developers",         # กลุ่มเป้าหมาย
-        "License :: OSI Approved :: MIT License",  # License type
-        "Programming Language :: Python :: 3",     # ภาษา
-        "Programming Language :: Python :: 3.8",   # Python versions ที่รองรับ
+        "Development Status :: 4 - Beta",  # Active research implementation
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Topic :: Software Development :: Compilers",
+        "Topic :: Software Development :: Code Generators",
+        "Framework :: FastAPI",
+        "Typing :: Typed",
     ],
     
-    # ========== Python Version Requirement ==========
-    python_requires=">=3.8",  # ต้องใช้ Python 3.8 ขึ้นไป
+    # ========== Python Version ==========
+    python_requires=">=3.8",
     
     # ========== Dependencies ==========
     install_requires=[
-        "ply>=3.11",         # PLY (Python Lex-Yacc) สำหรับ lexer และ parser
-        "watchdog>=3.0.0",   # File watcher สำหรับ hot reload (dukpyra run)
-        "click>=8.0.0",      # CLI framework สำหรับ commands
+        "ply>=3.11",          # Lexer & Parser
+        "watchdog>=3.0.0",    # Hot reload
+        "click>=8.0.0",       # CLI framework
     ],
     
-    # ========== CLI Entry Points ==========
-    # สร้าง command "dukpyra" ที่เรียก dukpyra.cli:main()
-    entry_points={
-        "console_scripts": [
-            "dukpyra=dukpyra.cli:main",  # $ dukpyra --help
+    # ========== Optional Dependencies ==========
+    extras_require={
+        "runtime": [
+            "fastapi>=0.100.0",  # Runtime type profiling
+            "uvicorn>=0.20.0",   # ASGI server
+        ],
+        "dev": [
+            "pytest>=7.0.0",
+            "pytest-cov>=4.0.0",
+            "black>=23.0.0",
         ],
     },
     
-    # ========== Include Extra Files ==========
-    include_package_data=True,  # รวมไฟล์ใน MANIFEST.in (templates, ฯลฯ)
+    # ========== CLI Entry Points ==========
+    entry_points={
+        "console_scripts": [
+            "dukpyra=dukpyra.cli:main",
+        ],
+    },
+    
+    # ========== Package Data ==========
+    include_package_data=True,
+    
+    # ========== Keywords ==========
+    keywords=[
+        "compiler",
+        "transpiler", 
+        "python",
+        "csharp",
+        "aspnet",
+        "backend",
+        "framework",
+        "research",
+    ],
 )
