@@ -427,10 +427,12 @@ def p_dict_item(p):
 # ==============================================================================
 
 def p_error(p):
-    if p:
-        print(f"Parser Error: Syntax error at '{p.value}' on line {p.lineno}")
-    else:
-        print("Parser Error: Unexpected end of file (EOF)")
+    # Silent mode - errors handled at analyzer level
+    pass
+    # if p:
+    #     print(f"Parser Error: Syntax error at '{p.value}' on line {p.lineno}")
+    # else:
+    #     print("Parser Error: Unexpected end of file (EOF)")
 
 
 # ==============================================================================

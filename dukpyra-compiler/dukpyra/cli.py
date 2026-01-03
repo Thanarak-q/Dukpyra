@@ -95,8 +95,8 @@ class DukpyraCompiler:
 
     def compile_project(self) -> bool:
         """Compile ทั้งโปรเจกต์"""
-        click.echo("🔨 Compiling Python to C#...")
-
+        # Silent compilation - only show critical errors
+        
         # หา Python files ในโฟลเดอร์หลักเท่านั้น (ไม่รวม subdirectories)
         # ยกเว้นไฟล์ที่ไม่ใช่ API เช่น tests, setup.py, conftest.py
         excluded_files = {'setup.py', 'conftest.py', '__init__.py'}
@@ -115,16 +115,20 @@ class DukpyraCompiler:
             click.echo("❌ No Python files found!", err=True)
             return False
 
-        # Compile แต่ละไฟล์
+        # Compile แต่ละไฟล์ (silently)
         all_routes = []
+        has_critical_error = False
+        
         for py_file in python_files:
-            click.echo(f"   📄 {py_file.relative_to(self.project_root)}")
             csharp_code = self.compile_file(py_file)
             if csharp_code:
                 all_routes.append(csharp_code)
+            else:
+                # Critical error - compilation completely failed
+                has_critical_error = True
 
-        if not all_routes:
-            click.echo("❌ No routes compiled!", err=True)
+        if has_critical_error or not all_routes:
+            click.echo("❌ Compilation failed", err=True)
             return False
 
         # สร้าง Program.cs
@@ -137,8 +141,7 @@ class DukpyraCompiler:
         # สร้าง .csproj
         self._create_csproj()
 
-        click.echo(f"✅ Compiled successfully!")
-        click.echo(f"   Output: {program_cs_path.relative_to(self.project_root)}")
+        click.echo(f"✅ Compiled {len(all_routes)} module(s)")
         return True
 
     def _merge_compiled_code(self, routes: list) -> str:
@@ -363,6 +366,20 @@ dukpyra run
     click.echo(f"\n📖 Edit main.py to add your routes")
 
 
+def find_available_port(start_port=5000, max_attempts=10):
+    """Find an available port starting from start_port"""
+    import socket
+    
+    for port in range(start_port, start_port + max_attempts):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.bind(('', port))
+                return port
+        except OSError:
+            continue
+    return start_port  # Fallback to original
+
+
 @cli.command()
 @click.option("--port", default=5000, help="Port to run on")
 @click.option("--watch/--no-watch", default=True, help="Enable file watching")
@@ -385,16 +402,41 @@ def run(port, watch):
         click.echo("   Install from: https://dotnet.microsoft.com/download")
         return
 
-    click.echo("🚀 Starting Dukpyra...\n")
+    # Beautiful Framework Banner
+    click.echo("")
+    click.echo("╔═══════════════════════════════════════════════════════════════╗")
+    click.echo("║                                                               ║")
+    click.echo("║   ██████╗ ██╗   ██╗██╗  ██╗██████╗ ██╗   ██╗██████╗  █████╗  ║")
+    click.echo("║   ██╔══██╗██║   ██║██║ ██╔╝██╔══██╗╚██╗ ██╔╝██╔══██╗██╔══██╗ ║")
+    click.echo("║   ██║  ██║██║   ██║█████╔╝ ██████╔╝ ╚████╔╝ ██████╔╝███████║ ║")
+    click.echo("║   ██║  ██║██║   ██║██╔═██╗ ██╔═══╝   ╚██╔╝  ██╔══██╗██╔══██║ ║")
+    click.echo("║   ██████╔╝╚██████╔╝██║  ██╗██║        ██║   ██║  ██║██║  ██║ ║")
+    click.echo("║   ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝        ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝ ║")
+    click.echo("║                                                               ║")
+    click.echo("║         Python → C# Backend Framework Compiler               ║")
+    click.echo("║                    v0.3.0 Research                            ║")
+    click.echo("║                                                               ║")
+    click.echo("╚═══════════════════════════════════════════════════════════════╝")
+    click.echo("")
 
     compiler = DukpyraCompiler(project_dir)
     compiler.ensure_structure()
 
-    # Compile ครั้งแรก
+    # Compile silently
     if not compiler.compile_project():
         return
+    
+    click.echo("")
 
-    click.echo(f"\n🌐 Starting ASP.NET server on port {port}...\n")
+    # Find available port if default is in use
+    available_port = find_available_port(port)
+    if available_port != port:
+        click.echo(f"⚠️  Port {port} in use, switching to {available_port}")
+        port = available_port
+    
+    click.echo("")
+    click.echo("🚀 Starting Production Server")
+    click.echo("─" * 65)
 
     csproj_path = compiler.compiled_dir / "dukpyra.csproj"
     process = None
@@ -404,6 +446,9 @@ def run(port, watch):
         if process:
             process.terminate()
             process.wait()
+
+        import re
+        import datetime
 
         process = subprocess.Popen(
             [
@@ -419,12 +464,69 @@ def run(port, watch):
             stderr=subprocess.STDOUT,
             text=True,
             bufsize=1,
+            env={**os.environ, "DOTNET_ENVIRONMENT": "Production"}  # Suppress verbose logs
         )
 
-        # แสดง output
+        # Custom log filtering
+        startup_shown = False
         try:
             for line in process.stdout:
-                click.echo(line.rstrip())
+                line = line.rstrip()
+                
+                # Skip verbose ASP.NET logs
+                if any(skip in line for skip in [
+                    "info: Microsoft",
+                    "warn: Microsoft", 
+                    "Building...",
+                    "Application started",
+                    "Application is shutting down",
+                    "Hosting environment",
+                    "Content root path"
+                ]):
+                    continue
+                
+                # Show startup message once
+                if "Now listening on" in line and not startup_shown:
+                    click.echo(f"╔═══════════════════════════════════════════════════════════════╗")
+                    click.echo(f"║                                                               ║")
+                    click.echo(f"║  ✅ Server Online                                             ║")
+                    click.echo(f"║  🌐 http://localhost:{port:<48} ║")
+                    click.echo(f"║  ⚡ Compiled with Dukpyra v0.3.0                              ║")
+                    click.echo(f"║                                                               ║")
+                    click.echo(f"╚═══════════════════════════════════════════════════════════════╝")
+                    click.echo("")
+                    click.echo("📡 HTTP Request Log")  
+                    click.echo("─" * 65)
+                    startup_shown = True
+                    continue
+                
+                # Parse and beautify HTTP request logs
+                if "HTTP/" in line:
+                    # Extract: 127.0.0.1:12345 - "GET /users/42 HTTP/1.1" 200 OK
+                    match = re.search(r'"(\w+)\s+(.*?)\s+HTTP', line)
+                    status_match = re.search(r'(\d{3})', line)
+                    
+                    if match and status_match:
+                        method = match.group(1)
+                        path = match.group(2)
+                        status = int(status_match.group(1))
+                        
+                        # Color coding
+                        if status < 300:
+                            status_icon = "✅"
+                        elif status < 400:
+                            status_icon = "🔄"
+                        else:
+                            status_icon = "❌"
+                        
+                        timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+                        click.echo(f"  {status_icon} {timestamp} {method:6} {path:30} → {status}")
+                    continue
+                
+                # Show other important messages
+                if line.strip():
+                    click.echo(f"    {line}")
+                    
         except KeyboardInterrupt:
             pass
 
